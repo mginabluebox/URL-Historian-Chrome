@@ -1,0 +1,30 @@
+{
+  "name": "Url Historian",
+  "version": "1.0.3",
+  "description": "Url Historian- Enlightening the social impact of the web through your web use",
+  "content_security_policy": "script-src 'self' https://ajax.googleapis.com; object-src 'self'",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "declarativeContent",
+    "storage"
+  ],
+  "icons" : {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "background": {
+    "scripts": ["aws-sdk.min.js","background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "manifest_version": 2
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+     <script src="popup.js" defer></script>
+
+  </head>
+  <body>
+    <div id="container"> </div>
+    <div class="wrapper">
+      <div class="b">
+        <label for="pauseSwitch" id="lbPause"></label>
+        <label class="switch" id="pauseSwitch">
+          <input type="checkbox" id="cbPause">
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <!-- User ID Input Field -->
+      <div class="a">
+        <form>
+          <div>
+              <label for="userID">User ID</label>
+              <input type="text" id="userID" placeholder="UserID" maxlength="20">
+              <button type="submit" id="btSubmit">Submit</button>
+          </div>
+        </form>
+      </div>
+
+    <!-- Blacklist Input and Display Field -->
+    <div id="blacklist" class="c">
+      <div id="addWebsite" class="header">
+        <label for="add">Add a Website to Blacklist </label>
+        <input type="blacklist" id="userInput" placeholder="www.websiteName.com">
+        <button id="btAdd" class="btAdd">Add</button>
+      </div>
+    </div>
+
+    <div class="d">
+      <label for="current blacklist"> Current Blacklisted Websites </label>
+      <ul id="currBlacklist">
+        <li>www.example.com</li>
+      </ul>
+    </div>
+
+    <div class="e">
+      <h3 class="img-title">Url Historian </h3>
+    </div>
+
+    <figure>
+      <img src="icon128.png" height="45px" width="auto">
+    </figure>
+
+  </body>
+</html>
