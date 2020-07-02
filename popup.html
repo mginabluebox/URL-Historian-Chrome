@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="utf-8"/>
     <link rel="stylesheet" type="text/css" href="style.css">
      <script src="popup.js" defer></script>
+     <!-- <script src="pop.js" defer></script> -->
+
 
   </head>
   <body>
@@ -21,17 +24,22 @@
         <form>
           <div>
               <label for="userID">User ID</label>
-              <input type="text" id="userID" placeholder="UserID" maxlength="20">
-              <button type="submit" id="btSubmit">Submit</button>
+              <input type="text" id="userID" placeholder="User ID" maxlength="20">
+              <button type="submit" id="btSubmit" >Submit</button>
+              <!-- <button type="submit" id="btSubmit" onclick="myFunction()">Submit</button> -->
+             <!-- <script>
+                function myFunction() {
+              alert('Welcome!!\nUrl historian is now active\nTo pause click the Url Historian icon and slide the option button to the left. For websites you wish not to share for ourresearch purpose, Please add them to the blacklist. For more information about research at CSMaP please read the redirected page');}</script> -->
           </div>
         </form>
+
       </div>
 
     <!-- Blacklist Input and Display Field -->
     <div id="blacklist" class="c">
       <div id="addWebsite" class="header">
-        <label for="add">Add a Website to Blacklist </label>
-        <input type="blacklist" id="userInput" placeholder="www.websiteName.com">
+        <label for="add">Blacklist a website </label>
+        <input type="blacklist" id="userInput" placeholder="www.websiteDomain.com">
         <button id="btAdd" class="btAdd">Add</button>
       </div>
     </div>

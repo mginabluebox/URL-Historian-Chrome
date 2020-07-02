@@ -1,4 +1,36 @@
-//remove items from blacklist that were user wishes to remove 
+
+//var console = chrome.extension.getBackgroundPage().console;
+
+//console.log('Hello')
+
+
+function setUserID() {
+  var msg = "Welcome to Url his Historian. Please enter your user ID!"
+  var userInputID = "" + document.getElementById("userID").value;
+  console.log(userInputID)
+  if (userInputID === '') { 
+    alert(msg);
+    } else {
+        chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"}) 
+      };  
+};
+
+chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
+  if (request.msg === "validation_failure") {
+  //  To do something
+    chrome.browserAction.setIcon({path: "icon_disabled.png"});
+    document.getElementById("userID").disabled = true
+    document.getElementById("userInput").disabled = true;
+    document.getElementById("btSubmit").disabled = true;
+    document.getElementById("btAdd").disabled = true
+    document.getElementById("cbPause").disabled = true
+    chrome.browserAction.setPopup({popup: ""});
+    console.log('popup disabled')
+  }
+});
+
+
+//remove items from blacklist 
 var remove = document.getElementsByClassName("remove");
 for (var i = 0; i < remove.length; i++) {
   remove[i].onclick = function() {
@@ -68,23 +100,6 @@ function newElement(myStr) {
   }
 }
 
-//updates the user ID to the value of the user input field
-function setUserID() {
-  var userInputID = "" + document.getElementById("userID").value;
-  if (userInputID === '') {
-    alert("Please enter user ID!");
-  } else {
-    chrome.storage.sync.get({userID}, function(temp) {
-    var currID = "" + temp.userID;
-    if (!(userInputID === currID))
-      {
-        chrome.storage.sync.set({userID: userInputID}, function(){
-        })
-      }
-    })
-  }
-}
-
 //removes a list item from the website blacklist
 function removeItem(div) {
   var str = div.innerText.substring(0, div.innerText.length - 1);
@@ -135,14 +150,14 @@ function pauseExtension(){
     chrome.storage.sync.set({isPaused: paused});
     var pauseLabel = document.getElementById("lbPause");
     if(paused){
+      chrome.browserAction.setIcon({path: "icon_disabled.png"});
       pauseLabel.innerHTML = "Paused";
     } else {
+      chrome.browserAction.setIcon({path: "icon128.png"});
       pauseLabel.innerHTML = "Active";
     }
   });
 }
-
-
 
 
 //link buttons to appropriate functions once website is loaded

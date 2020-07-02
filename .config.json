@@ -1,0 +1,6 @@
+{
+  "bucketRegion": "us-east-1",
+  "bucketName" : "plugin-browsing-data",
+  "poolId": "us-east-1:0a3c0c55-0f25-4158-b7b5-57db8e393ac4",
+  "idPath": "Ids/ids.txt"
+}
