@@ -50,9 +50,7 @@ function loadConfig(xhr) {
         if(err) return err;
         getObject(data);
   });
-
 }
-
 // LOAD FILE 
 var xhr = new XMLHttpRequest();
 xhr.open("GET", chrome.extension.getURL("/.config.json"), true);
@@ -67,6 +65,7 @@ xhr.onreadystatechange = function() {
   }
 };
 xhr.send();
+
 
 // CREATE OUTPUT PATH
 function createPath(msg) {
@@ -106,7 +105,7 @@ function upload(url, msg) {
   var outpath = createPath(msg);
 
   var params= JSON.stringify({
-  name: userID,
+  ID: userID,
   visited_url: url,
   timestamp: date.getTime()
   });
@@ -121,9 +120,44 @@ function upload(url, msg) {
 };
 
 
+
+var attempt = 3; 
+// receive message from popup on user input
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if(request.message == "setUserId") { 
+    // set user id
+    userID = request.userID;
+    // get user id and  configuration  
+  }
+    //VERIFY USER  CREDENTIALS         
+  if (containsObject(userID, validate)) {
+      chrome.tabs.create({url: "https://csmapnyu.org"});
+    } else {
+      attempt --
+      chrome.browserAction.setIcon({path: "icon_disabled.png"});
+      chrome.storage.sync.set({userID: 'Enter User ID'}, function(){});
+      if(attempt > 0) {
+        alert(msg_retry + '\nYou have ' + attempt + " attempt left");
+        chrome.storage.sync.set({isPaused: true}, function(){});
+      } else { 
+        alert(msg_final);
+        chrome.runtime.sendMessage({msg: "validation_failure"});
+      }     
+    }
+});
+
+chrome.runtime.onStartup.addListener(function () {
+  // START UP EVENT
+  loadConfig(xhr)
+    
+  chrome.storage.sync.get('userID', function(temp) {
+        userID = "" + temp.userID });
+});
+
+
 chrome.runtime.onInstalled.addListener(function(details) {
 
-  //chrome.storage.sync.set({userID: 'Enter User ID'}, function(){})
+  // chrome.storage.sync.set({userID: 'Enter User ID'}, function(){})
 
   var reason = details.reason
 
@@ -131,53 +165,30 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
   if (details.reason == "install") {
 
-    // first installation 
-      chrome.browserAction.setIcon({path: "icon_disabled.png"});
-    
-    // load configuration file
-      loadConfig(xhr)
+  //chrome.storage.sync.set({userID: 'Enter User ID'}, function(){});
 
-      // set plugin to pause
-      chrome.storage.sync.set({isPaused: true}, function(){});
+  // first installation 
+    chrome.browserAction.setIcon({path: "icon_disabled.png"});
+  
+  // load configuration file
+    loadConfig(xhr)
 
-      // set user attempt limit 
-      var attempt = 3; 
-    
-      // receive message from popup on user input
-      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        if(request.message == "setUserId") { 
-          // set user id
-          userID = request.userID;
-          // get user id and  configuration  
-          console.log(userID, validate)
+    // set plugin to pause
+    chrome.storage.sync.set({isPaused: true}, function(){});
 
-        }
-          //VERIFY USER  CREDENTIALS         
-        if (containsObject(userID, validate)) {
-            chrome.tabs.create({url: "https://csmapnyu.org"});
-          } else {
-            chrome.storage.sync.set({userID: 'Enter User ID'}, function(){});
-            attempt --
-            if(attempt > 0) {
-              alert(msg_retry+ '\nYou have ' + attempt + " attempt left");
-              chrome.storage.sync.set({isPaused: true}, function(){});
-            } else { 
-              alert(msg_final);
-              chrome.runtime.sendMessage({msg: "validation_failure"});
-            }     
-          }
-      });
     } else if (details.reason == 'update') {
+
+      loadConfig(xhr)
     
       chrome.storage.sync.get('userID', function(temp) {
-        userID = "" + temp.userID });
+       userID = "" + temp.userID });
 
-      loadConfig(xhr)
-      console.log(validate)
+      //console.log(validate)
 
-      chrome.storage.sync.get(['isPaused'], function(temp) {
-        pause = "" + temp.isPaused });
-     }
+      // chrome.storage.sync.get(['isPaused'], function(temp) {
+      //   pause = "" + temp.isPaused });
+    };
+  });
 
   // LISTEN TO TAB CHANGES 
   chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -218,7 +229,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
        if (!tab.url || !tab.url.includes("chrome://")) return;
       chrome.storage.sync.get(['isPaused'], function(temp){
         pause = temp.isPaused;
-        if (!pause){
+        if (!pause) {
           chrome.storage.sync.get({blacklist: []}, function(temp2) {
             var bl = temp2.blacklist;
             var m = 0;
@@ -241,4 +252,4 @@ chrome.runtime.onInstalled.addListener(function(details) {
       });
     });
   });
-});
+//});
