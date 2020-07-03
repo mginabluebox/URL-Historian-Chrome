@@ -1,19 +1,27 @@
 
-//var console = chrome.extension.getBackgroundPage().console;
+var console = chrome.extension.getBackgroundPage().console;
 
 //console.log('Hello')
-
-
+var currID
 function setUserID() {
   var msg = "Welcome to Url his Historian. Please enter your user ID!"
   var userInputID = "" + document.getElementById("userID").value;
-  console.log(userInputID)
+  chrome.storage.sync.get('userID', function(temp) {
+    currID = "" + temp.userID; 
+    console.log(currID);
+  });
+
+  console.log(userInputID, currID)
   if (userInputID === '') { 
     alert(msg);
-    } else {
+  } else if(!(userInputID === currID)) {
         chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"}) 
-      };  
+  } else {
+    chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"})
+  }
+
 };
+
 
 chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
   if (request.msg === "validation_failure") {
