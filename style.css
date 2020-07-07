@@ -62,7 +62,7 @@
  }
 
  /* style of popup window */
- .a, .b, .c, .d, .e {
+ .a, .b, .c, .d, .e, .f{
    position: relative;
    background-color: lavender;
    opacity: 0.9;
@@ -93,10 +93,10 @@
   }
 
  .c {
-    grid-area: 3 / 1  / span 1 / span 3;
+    grid-area: 4 / 1  / span 1 / span 3;
   }
  .d {
-    grid-area: 4 / 1  / span 1 / span 3;
+    grid-area: 5 / 1  / span 1 / span 3;
   }
 
  .e {
@@ -111,6 +111,9 @@
    background-color: snow;
  }
 
+ .f {
+    grid-area: 3 / 1 / span 1 / span 3;
+ }
 
  #btSubmit + #btAdd {
    position: absolute;
@@ -141,6 +144,43 @@
    background-color: #008081;
    border-radius: 8px;
  }
+
+ #btDeleteDate{
+   position: absolute;
+   right: 80px;
+   outline:0;
+ }
+
+ #btDeleteTime{
+   position: absolute;
+   right: 5px;
+   outline:0;
+ }
+
+ #btDeleteDate:active {
+   background-color: #008081;
+   outline: none;
+   font-style: oblique;
+   border-radius: 8px;
+ }
+
+ #btDeleteDate:hover {
+   background-color: #008081;
+   border-radius: 8px;
+ }
+
+ #btDeleteTime:active {
+   background-color: #008081;
+   outline: none;
+   font-style: oblique;
+   border-radius: 8px;
+ }
+
+ #btDeleteTime:hover {
+   background-color: #008081;
+   border-radius: 8px;
+ }
+ .validateTips { border: 1px solid transparent; font-size:13px; text-align: left;}
 
  button {
    margin-top: 1px;

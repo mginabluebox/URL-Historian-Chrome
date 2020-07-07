@@ -2,7 +2,7 @@
 var console = chrome.extension.getBackgroundPage().console;
 
 //console.log('Hello')
-var currID
+var currID;
 function setUserID() {
   var msg = "Welcome to Url his Historian. Please enter your user ID!"
   var userInputID = "" + document.getElementById("userID").value;
@@ -167,11 +167,68 @@ function pauseExtension(){
   });
 }
 
+// Delete browse history by date
+$( function() {
+
+  function getDate() {
+    var date = $( "#datepicker1" ).datepicker("getDate");
+    if (date !== null && date instanceof Date) {
+      console.log(date.toDateString());
+      $("datepicker1").datepicker('setDate', null);
+      $(this).dialog( "close" );
+      // return timestamp
+      return date.getTime();
+    } else {  
+      updateTips("Please select a valid date.")
+    }
+  }
+
+  function updateTips(t){
+    $(".validateTips")
+      .text(t)
+      .addClass( "ui-state-highlight" );
+      setTimeout(function() {
+        $(".validateTips").removeClass( "ui-state-highlight", 1500 );
+      }, 300 );
+  }
+
+    dialog = $( "#deleteByDateForm" ).dialog({
+        autoOpen: false,
+        height: 300,
+        width: 300,
+        modal: true,
+        buttons: [
+          {text: "Delete",
+           click: getDate},
+          {text: "Cancel",
+          click: function() {
+            dialog.dialog( "close" );
+            $('#datepicker1').datepicker('destroy');
+          }}
+        ]
+    });
+
+    $( "#btDeleteDate" ).button().on("click", function() {
+        dialog.dialog( "open" );
+        $( "#datepicker1" ).datepicker({
+          showOtherMonths: true,
+          selectOtherMonths:true,
+          minDate: -7, maxDate: 0
+        }).blur();
+    
+      });
+  } );
+
+// Delete browse history by time range
+
+
 
 //link buttons to appropriate functions once website is loaded
 window.addEventListener('DOMContentLoaded', (event) => {
   document.querySelector('#btSubmit').addEventListener('click', setUserID);
   document.querySelector('#btAdd').addEventListener('click', addElement);
   document.querySelector('#cbPause').addEventListener('change', pauseExtension);
+  //document.querySelector('#btDeleteDate').addEventListener('click', deleteDate);
+  //document.querySelector('#btDeleteTime').addEventListener('click', deleteTime);
   writeList();
 });

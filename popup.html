@@ -2,11 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
+    <link rel="stylesheet" href="jquery/jquery-ui.min.css">
+    <link rel="stylesheet" href="jquery/jquery.timepicker.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
      <script src="popup.js" defer></script>
+     <script src="jquery/jquery-3.5.1.min.js"></script>
+     <script src="jquery/jquery-ui.min.js"></script>
+
      <!-- <script src="pop.js" defer></script> -->
-
-
   </head>
   <body>
     <div id="container"> </div>
@@ -34,7 +37,40 @@
         </form>
 
       </div>
+      
+    <!-- Delete Browse History Field -->
+    <div id="deleteHistory" class="f">
+      <label for="deleteHistory">Delete recorded history</label>
+      <button id="btDeleteDate" class="btDeleteDate">by Date</button>
+      <button id="btDeleteTime" class = "btDeleteTime">by Time</button>
+    </div>
 
+    <!-- Delete by Date Dialog -->
+    <div id="deleteByDateForm" title="Delete Browse History by Date" class="e">
+      <p class="validateTips">Select a date within the past 7 days to delete. </p>
+      <form>
+        <fieldset>
+          <label for="datepicker1">Date: </label>
+          <input type="text" id="datepicker1" size="20">
+        </fieldset>
+      </form>
+    </div>
+
+    <!-- Delete by Time Dialog 
+    <div id="deleteByTimeForm" title="Delete Browse History by Time" class="e">
+      <p class="validateTips">Pick a time range of a date within the past 7 days to delete. </p>
+      <form>
+        <fieldset>
+          <label for="datepicker2">Date: </label>
+          <input type="text" id="datepicker2" size="20">
+          <label for="startTime">From: </label>
+          <input type="text" id="startTime" size="20">
+          <label for="endTime">To: </label>
+          <input type="text" id="endTime" size="20">
+        </fieldset>
+      </form>
+    </div>
+-->
     <!-- Blacklist Input and Display Field -->
     <div id="blacklist" class="c">
       <div id="addWebsite" class="header">
@@ -58,6 +94,7 @@
     <figure>
       <img src="icon128.png" height="45px" width="auto">
     </figure>
+
 
   </body>
 </html>
