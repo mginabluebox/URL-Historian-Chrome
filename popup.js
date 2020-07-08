@@ -167,59 +167,78 @@ function pauseExtension(){
   });
 }
 
-// Delete browse history by date
+// Request Data Deletion
 $( function() {
 
-  function getDate() {
-    var date = $( "#datepicker1" ).datepicker("getDate");
-    if (date !== null && date instanceof Date) {
-      console.log(date.toDateString());
-      $("datepicker1").datepicker('setDate', null);
-      $(this).dialog( "close" );
-      // return timestamp
-      return date.getTime();
-    } else {  
-      updateTips("Please select a valid date.")
-    }
-  }
+  var restrictedDates = []; // deleted dates
 
-  function updateTips(t){
-    $(".validateTips")
-      .text(t)
+// General functions for deleting history
+  function updateTips(id,text){
+    $(id)
+      .text(text)
       .addClass( "ui-state-highlight" );
+
       setTimeout(function() {
-        $(".validateTips").removeClass( "ui-state-highlight", 1500 );
+        $(id).removeClass( "ui-state-highlight", 1500 );
       }, 300 );
   }
 
-    dialog = $( "#deleteByDateForm" ).dialog({
+//Delete history by date
+  function getDateforByDate() {
+    if (restrictedDates.length === 7) {
+      updateTips(".validateTips", "You have no browse history to delete!");
+    }
+    var date = $("#datepicker1").datepicker("getDate");
+    if (date !== null && date instanceof Date) {
+      console.log($.datepicker.formatDate('yy-mm-dd', date));
+      $.datepicker._clearDate("#datepicker1");
+      $(this).dialog( "close" );
+      // disable the deleted date for next selection
+      // TODO: add today back in if new browse history is generated
+      restrictedDates.push($.datepicker.formatDate('yy-mm-dd', date));
+      // return timestamp
+      return date.getTime();
+    } else {  
+      updateTips(".validateTips","Please select a valid date.")
+    }
+  }
+
+    dialog1 = $( "#deleteByDateForm" ).dialog({
         autoOpen: false,
         height: 300,
         width: 300,
         modal: true,
         buttons: [
           {text: "Delete",
-           click: getDate},
+           click: getDateforByDate},
           {text: "Cancel",
           click: function() {
-            dialog.dialog( "close" );
-            $('#datepicker1').datepicker('destroy');
+            $.datepicker._clearDate("#datepicker1");
+            dialog1.dialog( "close" );
           }}
         ]
     });
 
     $( "#btDeleteDate" ).button().on("click", function() {
-        dialog.dialog( "open" );
-        $( "#datepicker1" ).datepicker({
-          showOtherMonths: true,
-          selectOtherMonths:true,
-          minDate: -7, maxDate: 0
-        }).blur();
-    
-      });
-  } );
+      dialog1.dialog( "open" );
+      $( "#datepicker1" ).datepicker({
+        showOtherMonths: true,
+        selectOtherMonths:true,
+        minDate: -6, maxDate: 0,
+        beforeShowDay: function(date) {
+          var string = $.datepicker.formatDate('yy-mm-dd', date);
+          return [restrictedDates.indexOf(string) == -1]
+        }
+      }).blur(); 
+    });
 
-// Delete browse history by time range
+// Delete history by time range   
+
+      
+
+  });
+
+
 
 
 
