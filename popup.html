@@ -8,7 +8,7 @@
      <script src="popup.js" defer></script>
      <script src="jquery/jquery-3.5.1.min.js"></script>
      <script src="jquery/jquery-ui.min.js"></script>
-
+     <script src="jquery/jquery.timepicker.min.js"></script>
      <!-- <script src="pop.js" defer></script> -->
   </head>
   <body>
@@ -47,7 +47,7 @@
 
     <!-- Delete by Date Dialog -->
     <div id="deleteByDateForm" title="Delete Browse History by Date" class="e">
-      <p class="validateTips">Select a date within the past 7 days to delete. </p>
+      <p class="validateTips1">Select a date within the past 7 days to delete. </p>
       <form>
         <fieldset>
           <label for="datepicker1">Date: </label>
@@ -56,9 +56,9 @@
       </form>
     </div>
 
-    <!-- Delete by Time Dialog 
+    <!-- Delete by Time Dialog -->
     <div id="deleteByTimeForm" title="Delete Browse History by Time" class="e">
-      <p class="validateTips">Pick a time range of a date within the past 7 days to delete. </p>
+      <p class="validateTips2">Pick a time range within the past 7 days to delete. </p>
       <form>
         <fieldset>
           <label for="datepicker2">Date: </label>
@@ -70,7 +70,7 @@
         </fieldset>
       </form>
     </div>
--->
+
     <!-- Blacklist Input and Display Field -->
     <div id="blacklist" class="c">
       <div id="addWebsite" class="header">
