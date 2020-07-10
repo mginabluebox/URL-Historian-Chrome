@@ -119,40 +119,74 @@ function upload(url, msg) {
      });
 };
 
-async function listObjects(prefix) {
+// async function listObjects(prefix) {
+
+//   var params = {
+//     Prefix: prefix
+//     }
+//   var keys = [];
+//   for (;;) {
+//     var data = await resource.listObjects(params).promise();
+
+//     data.Contents.forEach((elem) => {
+//       keys = keys.concat(elem.Key);
+//     });
+
+//     if (!data.IsTruncated) {
+//       break;
+//     }
+//     //console.log(data.NextMarker);
+//   }
+
+//   console.log(keys);
+// }
+
+// function emptyBucket(bucketName,callback){
+//   var params = {
+//     Bucket: bucketName,
+//     Prefix: 'folder/'
+//   };
+
+//   s3.listObjects(params, function(err, data) {
+//     if (err) return callback(err);
+
+//     if (data.Contents.length == 0) callback();
+
+//     params = {Bucket: bucketName};
+//     params.Delete = {Objects:[]};
+
+//     data.Contents.forEach(function(content) {
+//       params.Delete.Objects.push({Key: content.Key});
+//     });
+
+//     s3.deleteObjects(params, function(err, data) {
+//       if (err) return callback(err);
+//       if(data.Contents.length == 1000)emptyBucket(bucketName,callback);
+//       else callback();
+//     });
+//   });
+// }
+
+
+function listObjects(path) {
 
   var params = {
-    Prefix: prefix
+    Prefix: path + '/14'
     }
-  var keys = [];
-  for (;;) {
-    var data = await resource.listObjects(params).promise();
+  resource.listObjects(params, function(err, data) {
+      if (err) return err;
+      if (data.Contents.length ==0) return;
 
-    data.Contents.forEach((elem) => {
-      keys = keys.concat(elem.Key);
-    });
+      var deleteParams = {
+        Delete: {Objects: []}
+        };
 
-    if (!data.IsTruncated) {
-      break;
-    }
-    //console.log(data.NextMarker);
-  }
-
-  console.log(keys);
-}
-
-// function listObjects(path) {
-
-//   var keys = []
-//   var params = {
-//     Prefix: path
-// //     }
-// //   resource.listObjects(params, function(err, data){
-//       if (err) return callback(err);
-//       if (data.Contents.length ==0) callback();
-// //     console.log(data);
-// //   });
-// // };
+      data.Contents.forEach(({Key}) => {
+        deleteParams.Delete.Objects.push({ Key });
+      });
+      console.log(deleteParams);
+  });
+};
 
 function deleteObject(key) {
 
