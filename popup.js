@@ -189,13 +189,26 @@ $( function() {
     var year = date.getFullYear();
     return currID + "/" + year + "/" + ("0" + month).slice(-2) + "/" + ("0" + day).slice(-2);
   }
-
-  function formatDateTime(currID, date, time) {
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-    var year = date.getFullYear();
-    var hour = time.getHours();
-    return currID + "/" + year + "/" + ("0" + month).slice(-2) + "/" + ("0" + day).slice(-2) + "/" + ("0" + hour).slice(-2);
+  // startTime=null, endTime=null
+  function formatDateTime(currID, date, starttime=null, endtime=null) {
+    function pad(val) {
+      return (val<10) ? '0' + val : val;
+    }
+    var startTime;
+    var endTime; 
+    var day = date.toISOString().split('T')[0].replace(/-/g, '/');
+    if (starttime !== null && endtime == null) {
+      startTime = pad(starttime.getHours());
+      return [[currID, day, startTime].join('/')]
+    } else if (starttime !==null && endtime !==null) {
+      startTime = starttime.getHours();
+      endTime = endtime.getHours();
+      var timeRange =[];
+      for (var hour = startTime; hour <= endTime; hour++) {
+        timeRange.push([currID, day, pad(hour)].join('/'));
+      }
+      return timeRange;
+    }
   }
 
   async function getSyncStorageValue(key) {
@@ -319,13 +332,14 @@ $( function() {
     //   updateTips(".validateTips2", "You have no browse history to delete!");
     // } 
     else if (date !== null && startTime !== null && endTime !== null) {
-        var fStartTime = formatDateTime(currID, date, startTime);
-        var fEndTime = formatDateTime(currID, date, endTime);
-        console.log([fStartTime, fEndTime]);
+        var timeRange = formatDateTime(currID, date, starttime=startTime, endtime=endTime)
+
+        // var fEndTime = formatDateTime(currID, date, endTime);
         // if (endTime.getHours() - startTime.getHours() === 23) {
         //   console.log("delete date");
         //   restrictedDates.push($.datepicker.formatDate('yy-mm-dd', date));
         // }
+        chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
 
         // chrome.runtime.sendMessage({delbyTime : [fStartTime, fEndTime], message:'delbyTime'});
         $.datepicker._clearDate("#datepicker2");

@@ -81,24 +81,23 @@ function createPath(msg) {
   var hour = pad(date.getHours());
   var minute = pad(date.getMinutes());
   var seconds = date.getSeconds()
+  console.log(file, day)
 
-  // // create filenam
+  // // create filename key
   filepath = [userID, day, hour, ''].join('/') + [userID, file, hour, minute, seconds].join('_')
 
   if (!pause){
     if (msg === 'new') {
       return filepath + '.json' 
-
     } else if (msg === 'blacklisted') {
      return  filepath + '_' + msg + '.json'
-
     }
   } else {
     return  filepath + '_paused.json';
   }
 };
 
-
+// EVENT UPLOAD
 function upload(url, msg) {
 
   date = new Date()
@@ -119,64 +118,15 @@ function upload(url, msg) {
      });
 };
 
-// async function listObjects(prefix) {
-
-//   var params = {
-//     Prefix: prefix
-//     }
-//   var keys = [];
-//   for (;;) {
-//     var data = await resource.listObjects(params).promise();
-
-//     data.Contents.forEach((elem) => {
-//       keys = keys.concat(elem.Key);
-//     });
-
-//     if (!data.IsTruncated) {
-//       break;
-//     }
-//     //console.log(data.NextMarker);
-//   }
-
-//   console.log(keys);
-// }
-
-// function emptyBucket(bucketName,callback){
-//   var params = {
-//     Bucket: bucketName,
-//     Prefix: 'folder/'
-//   };
-
-//   s3.listObjects(params, function(err, data) {
-//     if (err) return callback(err);
-
-//     if (data.Contents.length == 0) callback();
-
-//     params = {Bucket: bucketName};
-//     params.Delete = {Objects:[]};
-
-//     data.Contents.forEach(function(content) {
-//       params.Delete.Objects.push({Key: content.Key});
-//     });
-
-//     s3.deleteObjects(params, function(err, data) {
-//       if (err) return callback(err);
-//       if(data.Contents.length == 1000)emptyBucket(bucketName,callback);
-//       else callback();
-//     });
-//   });
-// }
-
-
-function listObjects(path) {
+// EVENT DELETE BY DATE OR TIME 
+async function deleteObjects(prefix) {
 
   var params = {
-    Prefix: path + '/14'
+    Prefix: prefix
     }
-  resource.listObjects(params, function(err, data) {
+  await resource.listObjects(params, function(err, data) {
       if (err) return err;
       if (data.Contents.length ==0) return;
-
       var deleteParams = {
         Delete: {Objects: []}
         };
@@ -184,19 +134,13 @@ function listObjects(path) {
       data.Contents.forEach(({Key}) => {
         deleteParams.Delete.Objects.push({ Key });
       });
-      console.log(deleteParams);
+      console.log(deleteParams)
+      // await resource.deleteObjects(deleteParams, function(err, data) {
+      //   if (err) return err;
+      //   if(data.IsTruncated) await deleteObjects(path);
+      //   else return;
+      // });
   });
-};
-
-function deleteObject(key) {
-
-  console.log(key)
-  resource.deleteObject({
-     Key: key +'/*'
-     }, function(err, data) {
-      if (err) return err;
-      return 'uploaded successful'
-     });
 };
 
 
@@ -223,12 +167,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           chrome.runtime.sendMessage({msg: "validation_failure"});
         }     
       }
-  } else if(request.message == "delbyDate") { 
+  } else if(request.message == "delbyTime") { 
       // set user id
-      var prefix = request.delbyDate;
+      var prefix = request.delbyTime;
       console.log(prefix.length);
-      if (prefix.length ===1){
-          listObjects(prefix[0]);
+      if (prefix.length ==1){
+          deleteObjects(prefix[0]);
+      } else if(prefix.length > 1) {
+        for (i=0; i < prefix.length; i++) {
+          deleteObjects(prefix[i])
+        }
       }
       //listObjects(prefix)
       //console.log(keys)
