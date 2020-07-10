@@ -266,7 +266,7 @@ $( function() {
   dialog1 = $( "#deleteByDateForm" ).dialog({
       autoOpen: false,
       height: 200,
-      width: 200,
+      width: 180,
       modal: true,
       buttons: [
           {text: "Delete",
@@ -338,8 +338,8 @@ $( function() {
 
     dialog2 = $( "#deleteByTimeForm" ).dialog({
         autoOpen: false,
-        height: 300,
-        width: 120,
+        height: 210,
+        width: 200,
         modal: true,
         buttons: [
           {text: "Delete",

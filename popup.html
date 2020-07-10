@@ -37,33 +37,33 @@
     <!-- Delete Browse History Field -->
     <div id="deleteHistory" class="f">
       <label for="deleteHistory">Delete browse history</label>
-      <button id="btDeleteDate" class="btDeleteDate">by Date</button>
-      <button id="btDeleteTime" class="btDeleteTime">by Time</button>
+      <button type="date" id="btDeleteDate" class="btDeleteDate">by Date</button>
+      <button type="time" id="btDeleteTime" class="btDeleteTime">by Time</button>
     </div>
 
     <!-- Delete by Date Dialog -->
-    <div id="deleteByDateForm" title="Delete Browse History by Date" class="g">
-      <p class="validateTips1">Select a date within the past 7 days to delete. </p>
+    <div id="deleteByDateForm" title="Delete history by Date" class="g">
+      <p class="validateTips1">Select a date or date range within the past 7 days </p>
       <form>
-        <fieldset>
+        <!-- <fieldset> -->
           <label for="datepicker1">Date: </label>
-          <input type="text" id="datepicker1" size="15">
-        </fieldset>
+          <input type="text" id="datepicker1" size="18">
+        <!-- </fieldset> -->
       </form>
     </div>
 
     <!-- Delete by Time Dialog -->
-    <div id="deleteByTimeForm" title="Delete Browse History by Time" class="g">
-      <p class="validateTips2">Pick a time range within the past 7 days to delete. </p>
+    <div id="deleteByTimeForm" title="Delete History by Time" class="g">
+      <p class="validateTips2">Select a time range within the past 7 days </p>
       <form>
-        <fieldset>
+        <!-- <fieldset> -->
           <label for="datepicker2">Date: </label>
-          <input type="text" id="datepicker2" size="15">
+          <input type="text" id="datepicker2" size="18">
           <label for="startTime">StartTime: </label>
-          <input type="text" id="startTime" size="15">
+          <input type="text" id="startTime" size="18">
           <label for="endTime">EndTime: </label>
-          <input type="text" id="endTime" size="15">
-        </fieldset>
+          <input type="text" id="endTime" size="18">
+        <!-- </fieldset> -->
       </form>
     </div>
 
@@ -84,7 +84,7 @@
     </div>
 
     <div class="e">
-      <h3 class="img-title">Url Historian </h3>
+      <h2 class="img-title">Url Historian </h2>
     </div>
 
     <figure>
