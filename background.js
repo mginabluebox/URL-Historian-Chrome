@@ -119,6 +119,51 @@ function upload(url, msg) {
      });
 };
 
+async function listObjects(prefix) {
+
+  var params = {
+    Prefix: prefix
+    }
+  var keys = [];
+  for (;;) {
+    var data = await resource.listObjects(params).promise();
+
+    data.Contents.forEach((elem) => {
+      keys = keys.concat(elem.Key);
+    });
+
+    if (!data.IsTruncated) {
+      break;
+    }
+    //console.log(data.NextMarker);
+  }
+
+  console.log(keys);
+}
+
+// function listObjects(path) {
+
+//   var keys = []
+//   var params = {
+//     Prefix: path
+// //     }
+// //   resource.listObjects(params, function(err, data){
+//       if (err) return callback(err);
+//       if (data.Contents.length ==0) callback();
+// //     console.log(data);
+// //   });
+// // };
+
+function deleteObject(key) {
+
+  console.log(key)
+  resource.deleteObject({
+     Key: key +'/*'
+     }, function(err, data) {
+      if (err) return err;
+      return 'uploaded successful'
+     });
+};
 
 
 var attempt = 3; 
@@ -128,23 +173,32 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // set user id
     userID = request.userID;
     // get user id and  configuration  
-  }
+  
     //VERIFY USER  CREDENTIALS         
-  if (containsObject(userID, validate)) {
-      chrome.tabs.create({url: "https://csmapnyu.org"});
-    } else {
-      attempt --
-      chrome.browserAction.setIcon({path: "icon_disabled.png"});
-      chrome.storage.sync.set({userID: 'Enter User ID'}, function(){});
-      if(attempt > 0) {
-        alert(msg_retry + '\nYou have ' + attempt + " attempt left");
-        chrome.storage.sync.set({isPaused: true}, function(){});
-      } else { 
-        alert(msg_final);
-        chrome.runtime.sendMessage({msg: "validation_failure"});
-      }     
-    }
+    if (containsObject(userID, validate)) {
+        chrome.tabs.create({url: "https://csmapnyu.org"});
+      } else {
+        attempt --
+        chrome.browserAction.setIcon({path: "icon_disabled.png"});
+        chrome.storage.sync.set({userID: 'Enter User ID'}, function(){});
+        if(attempt > 0) {
+          alert(msg_retry + '\nYou have ' + attempt + " attempt left");
+          chrome.storage.sync.set({isPaused: true}, function(){});
+        } else { 
+          alert(msg_final);
+          chrome.runtime.sendMessage({msg: "validation_failure"});
+        }     
+      }
+  } else if(request.message == "delbyDate") { 
+      // set user id
+      var prefix = request.delbyDate;
+      console.log(prefix);
+      listObjects(prefix)
+      //console.log(keys)
+      // get user id and  configuration  
+  }
 });
+
 
 chrome.runtime.onStartup.addListener(function () {
   // START UP EVENT
