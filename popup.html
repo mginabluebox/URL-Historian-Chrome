@@ -29,10 +29,6 @@
               <label for="userID">User ID</label>
               <input type="text" id="userID" placeholder="User ID" maxlength="20">
               <button type="submit" id="btSubmit" >Submit</button>
-              <!-- <button type="submit" id="btSubmit" onclick="myFunction()">Submit</button> -->
-             <!-- <script>
-                function myFunction() {
-              alert('Welcome!!\nUrl historian is now active\nTo pause click the Url Historian icon and slide the option button to the left. For websites you wish not to share for ourresearch purpose, Please add them to the blacklist. For more information about research at CSMaP please read the redirected page');}</script> -->
           </div>
         </form>
 
@@ -40,33 +36,33 @@
 
     <!-- Delete Browse History Field -->
     <div id="deleteHistory" class="f">
-      <label for="deleteHistory">Delete recorded history</label>
+      <label for="deleteHistory">Delete browse history</label>
       <button id="btDeleteDate" class="btDeleteDate">by Date</button>
-      <button id="btDeleteTime" class = "btDeleteTime">by Time</button>
+      <button id="btDeleteTime" class="btDeleteTime">by Time</button>
     </div>
 
     <!-- Delete by Date Dialog -->
-    <div id="deleteByDateForm" title="Delete Browse History by Date" class="e">
+    <div id="deleteByDateForm" title="Delete Browse History by Date" class="g">
       <p class="validateTips1">Select a date within the past 7 days to delete. </p>
       <form>
         <fieldset>
           <label for="datepicker1">Date: </label>
-          <input type="text" id="datepicker1" size="20">
+          <input type="text" id="datepicker1" size="15">
         </fieldset>
       </form>
     </div>
 
     <!-- Delete by Time Dialog -->
-    <div id="deleteByTimeForm" title="Delete Browse History by Time" class="e">
+    <div id="deleteByTimeForm" title="Delete Browse History by Time" class="g">
       <p class="validateTips2">Pick a time range within the past 7 days to delete. </p>
       <form>
         <fieldset>
           <label for="datepicker2">Date: </label>
-          <input type="text" id="datepicker2" size="20">
-          <label for="startTime">From: </label>
-          <input type="text" id="startTime" size="20">
-          <label for="endTime">To: </label>
-          <input type="text" id="endTime" size="20">
+          <input type="text" id="datepicker2" size="15">
+          <label for="startTime">StartTime: </label>
+          <input type="text" id="startTime" size="15">
+          <label for="endTime">EndTime: </label>
+          <input type="text" id="endTime" size="15">
         </fieldset>
       </form>
     </div>
@@ -75,7 +71,7 @@
     <div id="blacklist" class="c">
       <div id="addWebsite" class="header">
         <label for="add">Blacklist a website </label>
-        <input type="blacklist" id="userInput" placeholder="www.websiteDomain.com">
+        <input type="blacklist" id="userInput" placeholder="www.siteDomain.com">
         <button id="btAdd" class="btAdd">Add</button>
       </div>
     </div>

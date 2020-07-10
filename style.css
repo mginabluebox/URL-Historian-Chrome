@@ -62,13 +62,13 @@
  }
 
  /* style of popup window */
- .a, .b, .c, .d, .e, .f{
+ .a, .b, .c, .d, .e, .f {
    position: relative;
-   background-color: lavender;
+   background-color: lavender ;
    opacity: 0.9;
    padding: 5px;
-   border: 0.5px;
-   border-radius: 10px;
+   border: 0.2px;
+   border-radius: 3px;
    font-size: 18px;
    line-height: 24px;
    font-weight: 300;
@@ -78,10 +78,10 @@
  .wrapper {
    display: grid; /* this applies only to direct child elements */
    grid-template-columns: repeat(3, 1fr); /* or 2fr 1fr 2fr; -  three columns 1fr = 200px */
-   grid-auto-rows:minmax(50px, auto);
-   column-gap: 3px;
+   grid-auto-rows:minmax(45px, auto);
+   column-gap: 2px;
    grip-gap: 1px;
-   row-gap: 3px;
+   row-gap: 2px;
  }
  
  .b {
@@ -115,6 +115,14 @@
     grid-area: 3 / 1 / span 1 / span 3;
  }
 
+ .g input {
+   border-radius: 1px;
+   border: 2px double purple;
+   background-color: whitesmoke;
+   padding: 3px 1px;
+   outline: none;
+ }
+
  #btSubmit + #btAdd {
    position: absolute;
    right: 20px;
@@ -122,71 +130,62 @@
  }
 
  #btSubmit:active {
-   background-color: #57068c;
-   outline: none;
+   /*outline: none;*/
    font-style: oblique;
-   border-radius: 8px;
+   /*border-radius: 8px;*/
  }
 
  #btSubmit:hover {
-   background-color: #57068c;
-   border-radius: 7px;
+  background-color: #BF94E4;
  }
 
  #btAdd:active {
-   background-color: #008081;
    outline: none;
    font-style: oblique;
    border-radius: 8px;
  }
 
  #btAdd:hover {
-   background-color: #008081;
+   background-color: #BF94E4;
    border-radius: 8px;
  }
 
- #btDeleteDate{
-   position: absolute;
-   right: 80px;
-   outline:0;
+ #btDeleteDate  {
+  margin-top: 0.0001px;
+  position: absolute;
+  right: 80px;
+  outline:none;
+  padding: 8px 5px;
+  display: inline-block;
+  font-size: 18px;
+  border-radius: 7px;
  }
 
- #btDeleteTime{
-   position: absolute;
-   right: 5px;
-   outline:0;
- }
-
- #btDeleteDate:active {
-   background-color: #008081;
-   outline: none;
-   font-style: oblique;
-   border-radius: 8px;
+ #btDeleteTime {
+  margin-top: 0.0001px;
+  position: absolute;
+  right: 1px;
+  outline:none;
+  padding: 8px 5px;
+  display: inline-block;
+  font-size: 18px;
+  border-radius: 7px;
  }
 
  #btDeleteDate:hover {
-   background-color: #008081;
-   border-radius: 8px;
- }
-
- #btDeleteTime:active {
-   background-color: #008081;
-   outline: none;
-   font-style: oblique;
-   border-radius: 8px;
+   background-color: #BF94E4;
  }
 
  #btDeleteTime:hover {
-   background-color: #008081;
-   border-radius: 8px;
+   background-color: #BF94E4;
  }
  .validateTips { border: 1px solid transparent; font-size:13px; text-align: left;}
 
  button {
-   margin-top: 1px;
+   margin-top: 0.1px;
    float: right;
    outline: none;
-   padding: 5px 3px;
+   padding: 8px 5px;
    display: inline-block;
    margin: 1px 1px;
    font-size: 16px;
@@ -194,30 +193,15 @@
 
  }
 
-/* 
-background-color: #4CAF50;
-  border: none;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
 
-*/
  input  {
-   border-radius: 10px;
+   border-radius: 5px;
    border: 2px double #008081;
    background-color: whitesmoke;
    font-style: italic;
-   padding: 7px 8px;
+   padding: 10px 5px;
    outline: none;
  }
-/*
- input::-webkit-input-placeholder {
-    color: purple;
-  }*/
 
   body {
     width: max-content;
@@ -248,12 +232,11 @@ background-color: #4CAF50;
     display:inline-block;
   }
   .c button {
-    margin-right: 22px;
+    margin-top: 0.001px;
+    margin-right: 10px;
+    padding: 8px 10px;
   }
-  /*.a label {
-    display:inline-block;
-  }
-*/
+ 
   h3.img-title {
     position: absolute;
     left: 25%;

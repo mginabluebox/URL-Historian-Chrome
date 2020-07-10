@@ -192,8 +192,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   } else if(request.message == "delbyDate") { 
       // set user id
       var prefix = request.delbyDate;
-      console.log(prefix);
-      listObjects(prefix)
+      console.log(prefix.length);
+      if (prefix.length ===1){
+          listObjects(prefix[0]);
+      }
+      //listObjects(prefix)
       //console.log(keys)
       // get user id and  configuration  
   }

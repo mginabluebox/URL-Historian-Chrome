@@ -254,7 +254,7 @@ $( function() {
       var formattedDate = formatDate(currID, date);
       console.log(formattedDate);
       //setRestrictedDates(date);
-      //chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
+      chrome.runtime.sendMessage({delbyDate: [formattedDate], message:'delbyDate'});
       $.datepicker._clearDate("#datepicker1");
       $(this).dialog( "close" );
     } else {  
@@ -265,8 +265,8 @@ $( function() {
 // Dialog and button action assignments
   dialog1 = $( "#deleteByDateForm" ).dialog({
       autoOpen: false,
-      height: 300,
-      width: 300,
+      height: 200,
+      width: 200,
       modal: true,
       buttons: [
           {text: "Delete",
@@ -339,7 +339,7 @@ $( function() {
     dialog2 = $( "#deleteByTimeForm" ).dialog({
         autoOpen: false,
         height: 300,
-        width: 300,
+        width: 120,
         modal: true,
         buttons: [
           {text: "Delete",
