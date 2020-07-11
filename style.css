@@ -119,6 +119,10 @@
    outline: none;
  }
 
+ .g select {
+  margin: 2px;
+ }
+
  #btSubmit + #btAdd {
    position: absolute;
    right: 20px;
@@ -141,7 +145,6 @@
 
  #btAdd:hover {
    background-color: #BF94E4;
-   border-radius: 8px;
  }
 
  #btDeleteDate  {
@@ -173,6 +176,16 @@
  #btDeleteTime:hover {
    background-color: #BF94E4;
  }
+
+ fieldset {
+    border: 1px solid grey;
+    border-radius: 6px;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    vertical-align: middle;
+    margin: 2px;
+  }
+
  .validateTips { border: 1px solid transparent; font-size:13px; text-align: left;}
 
  button {
@@ -184,7 +197,6 @@
    margin: 1px 1px;
    font-size: 16px;
    border-radius: 5px;
-
  }
 
 
@@ -242,7 +254,7 @@
     margin-top: -0.5px;
     
   }
-
+  
   .remove {
     padding-left: 3px;
     padding-right: 3px;
