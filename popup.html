@@ -42,28 +42,117 @@
     </div>
 
     <!-- Delete by Date Dialog -->
-    <div id="deleteByDateForm" title="Delete history by Date" class="g">
-      <p class="validateTips1">Select a date or date range within the past 7 days </p>
+    <div id="deleteByDateForm" title="Delete History by Date" class="g">
+      <p class="validateTips1" style="border: 1px solid transparent"> </p>
       <form>
-        <!-- <fieldset> -->
+        <fieldset>
           <label for="datepicker1">Date: </label>
-          <input type="text" id="datepicker1" size="18">
-        <!-- </fieldset> -->
+          <input type="text" id="datepicker1" tabindex="-1" size="15">
+        </fieldset>
       </form>
     </div>
 
-    <!-- Delete by Time Dialog -->
+        <!-- Delete by Time Dialog -->
     <div id="deleteByTimeForm" title="Delete History by Time" class="g">
-      <p class="validateTips2">Select a time range within the past 7 days </p>
-      <form>
-        <!-- <fieldset> -->
+      <p class="validateTips2" style="border: 1px solid transparent"> </p>
+      <form>   
+        <fieldset>
           <label for="datepicker2">Date: </label>
-          <input type="text" id="datepicker2" size="18">
+          <input type="text" id="datepicker2" tabindex="-1" size="15">
+        </fieldset>
+        <fieldset>
+          <p>Select an hour range.</p>
           <label for="startTime">StartTime: </label>
-          <input type="text" id="startTime" size="18">
+          <!-- <input type="text" id="startTime" size="15"> -->
+          <select id="startTime"> 
+            <option value = ''> --Select-- </option>
+            <option value = '0'> 12:00am </option>
+            <option value = '1'> 1:00am </option>
+            <option value = "2"> 2:00am </option>
+            <option value = "3"> 3:00am </option>
+            <option value = "4"> 4:00am </option>
+            <option value = "5"> 5:00am </option>
+            <option value = "6"> 6:00am </option>
+            <option value = "7"> 7:00am </option>
+            <option value = "8"> 8:00am </option>
+            <option value = "9"> 9:00am </option>
+            <option value = "10"> 10:00am </option>
+            <option value = "11"> 11:00am </option>
+            <option value = "12"> 12:00pm </option>
+            <option value = "13"> 1:00pm </option>
+            <option value = "14"> 2:00pm </option>
+            <option value = "15"> 3:00pm </option>
+            <option value = "16"> 4:00pm </option>
+            <option value = "17"> 5:00pm </option>
+            <option value = "18"> 6:00pm </option>
+            <option value = "19"> 7:00pm </option>
+            <option value = "20"> 8:00pm </option>
+            <option value = "21"> 9:00pm </option>
+            <option value = "22"> 10:00pm </option>
+            <option value = "23"> 11:00pm </option>
+          </select>
           <label for="endTime">EndTime: </label>
-          <input type="text" id="endTime" size="18">
-        <!-- </fieldset> -->
+          <!-- <input type="text" id="endTime" size="15"> -->
+          <select id="endTime"> 
+            <option value = ''> --Select-- </option>
+            <option value = '0'> 12:00am </option>
+            <option value = '1'> 1:00am </option>
+            <option value = "2"> 2:00am </option>
+            <option value = "3"> 3:00am </option>
+            <option value = "4"> 4:00am </option>
+            <option value = "5"> 5:00am </option>
+            <option value = "6"> 6:00am </option>
+            <option value = "7"> 7:00am </option>
+            <option value = "8"> 8:00am </option>
+            <option value = "9"> 9:00am </option>
+            <option value = "10"> 10:00am </option>
+            <option value = "11"> 11:00am </option>
+            <option value = "12"> 12:00pm </option>
+            <option value = "13"> 1:00pm </option>
+            <option value = "14"> 2:00pm </option>
+            <option value = "15"> 3:00pm </option>
+            <option value = "16"> 4:00pm </option>
+            <option value = "17"> 5:00pm </option>
+            <option value = "18"> 6:00pm </option>
+            <option value = "19"> 7:00pm </option>
+            <option value = "20"> 8:00pm </option>
+            <option value = "21"> 9:00pm </option>
+            <option value = "22"> 10:00pm </option>
+            <option value = "23"> 11:00pm </option>
+          </select>
+
+          <p style="font-weight:bold">OR</p>
+          <p>Select a single hour.</p>
+          <label for="singleTime">Time: </label>
+          <!-- <input type="text" id="singleTime" size="15"> -->
+          <select id="singleTime"> 
+            <option value = ''> --Select-- </option>
+            <option value = '0'> 12:00am </option>
+            <option value = '1'> 1:00am </option>
+            <option value = "2"> 2:00am </option>
+            <option value = "3"> 3:00am </option>
+            <option value = "4"> 4:00am </option>
+            <option value = "5"> 5:00am </option>
+            <option value = "6"> 6:00am </option>
+            <option value = "7"> 7:00am </option>
+            <option value = "8"> 8:00am </option>
+            <option value = "9"> 9:00am </option>
+            <option value = "10"> 10:00am </option>
+            <option value = "11"> 11:00am </option>
+            <option value = "12"> 12:00pm </option>
+            <option value = "13"> 1:00pm </option>
+            <option value = "14"> 2:00pm </option>
+            <option value = "15"> 3:00pm </option>
+            <option value = "16"> 4:00pm </option>
+            <option value = "17"> 5:00pm </option>
+            <option value = "18"> 6:00pm </option>
+            <option value = "19"> 7:00pm </option>
+            <option value = "20"> 8:00pm </option>
+            <option value = "21"> 9:00pm </option>
+            <option value = "22"> 10:00pm </option>
+            <option value = "23"> 11:00pm </option>
+          </select>
+        </fieldset>
       </form>
     </div>
 
