@@ -183,13 +183,14 @@ $( function() {
       }, 300 );
   }
 
-  function formatDate(currID, date) {
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-    var year = date.getFullYear();
-    return currID + "/" + year + "/" + ("0" + month).slice(-2) + "/" + ("0" + day).slice(-2);
-  }
-  // startTime=null, endTime=null
+  // function formatDateTime(currID, date, time) {
+  //   var month = date.getMonth() + 1;
+  //   var day = date.getDate();
+  //   var year = date.getFullYear();
+  //   var hour = time.getHours();
+  //   return currID + "/" + year + "/" + ("0" + month).slice(-2) + "/" + ("0" + day).slice(-2) + "/" + ("0" + hour).slice(-2);
+  // }
+
   function formatDateTime(currID, date, starttime=null, endtime=null) {
     function pad(val) {
       return (val<10) ? '0' + val : val;
@@ -197,12 +198,14 @@ $( function() {
     var startTime;
     var endTime; 
     var day = date.toISOString().split('T')[0].replace(/-/g, '/');
-    if (starttime !== null && endtime == null) {
-      startTime = pad(starttime.getHours());
+    if (starttime == '' && endtime == '') {
+      return [[currID, day].join('/')]
+    } else if (starttime !== '' && endtime == '') {
+      startTime = pad(starttime);
       return [[currID, day, startTime].join('/')]
-    } else if (starttime !==null && endtime !==null) {
-      startTime = starttime.getHours();
-      endTime = endtime.getHours();
+    } else if (starttime !== '' && endtime !=='') {
+      startTime = starttime;
+      endTime = endtime;
       var timeRange =[];
       for (var hour = startTime; hour <= endTime; hour++) {
         timeRange.push([currID, day, pad(hour)].join('/'));
@@ -264,10 +267,10 @@ $( function() {
     //   updateTips(".validateTips1", "You have no browse history to delete!");
     // } 
     else if (date !== null && date instanceof Date) {
-      var formattedDate = formatDate(currID, date);
-      console.log(formattedDate);
+      var formattedDate = formatDateTime(currID, date,starttime='',endtime='');
+      console.log(formattedDate[0]);
       //setRestrictedDates(date);
-      chrome.runtime.sendMessage({delbyDate: [formattedDate], message:'delbyDate'});
+      chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
       $.datepicker._clearDate("#datepicker1");
       $(this).dialog( "close" );
     } else {  
@@ -291,6 +294,8 @@ $( function() {
         }}
       ]
   });
+
+    $("#btDeleteDate").button().removeClass();
 
 // initialize
   // const a = getSyncStorageValue('userID');
@@ -352,8 +357,8 @@ $( function() {
 
     dialog2 = $( "#deleteByTimeForm" ).dialog({
         autoOpen: false,
-        height: 210,
-        width: 200,
+        height: 250,
+        width: 220,
         modal: true,
         buttons: [
           {text: "Delete",
