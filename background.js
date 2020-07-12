@@ -8,13 +8,13 @@ msg_retry = "Welcome and thank your for installing Url historian!!\n\nUnfortunat
 
 msg_final = "Thank you for your interest in Url Historian\n Unfortunately, multiple attempts to verify the user ID provided have failed\n\nIf you have been recruited to participate in research by CSMaP or our affiliated institution\nPlease contact personell at csmap.org for assistance.\n\nOtherwise only recruited research participants are authorized to use this application\nIf you would like to participate in a study, Please contact personell above.\n\nThis application will now be disabled\nPlease remove the extension from your browser\n\n"
 
-
 var userID ;
 var resource;
 var pause;
 var config;
 var date;
 var validate;
+var attempt;
 
 function containsObject(obj, list) {
     var i;
@@ -66,7 +66,6 @@ xhr.onreadystatechange = function() {
 };
 xhr.send();
 
-
 // CREATE OUTPUT PATH
 function createPath(msg) {
 
@@ -75,76 +74,70 @@ function createPath(msg) {
   }
 
   // SET ACCESS TIME 
-  
   var day = date.toISOString().split('T')[0].replace(/-/g, '/')
   var file = date.toISOString().split('T')[0].replace(/-/g, '_')
   var hour = pad(date.getHours());
   var minute = pad(date.getMinutes());
   var seconds = date.getSeconds()
-  console.log(file, day)
 
-  // // create filename key
+  // create object key
   filepath = [userID, day, hour, ''].join('/') + [userID, file, hour, minute, seconds].join('_')
 
-  if (!pause){
+  if(pause){ 
+    return  filepath + '_paused.json';
+  } else if(!pause){
     if (msg === 'new') {
       return filepath + '.json' 
     } else if (msg === 'blacklisted') {
      return  filepath + '_' + msg + '.json'
     }
-  } else {
-    return  filepath + '_paused.json';
-  }
+  } 
 };
 
 // EVENT UPLOAD
 function upload(url, msg) {
-
   date = new Date()
   var outpath = createPath(msg);
-
   var params= JSON.stringify({
   ID: userID,
   visited_url: url,
   timestamp: date.getTime()
   });
   console.log(outpath, params)
-  resource.upload({
-     Key: outpath,
-     Body: params
-     }, function(err, data) {
-      if (err) return err;
-      return 'uploaded successful'
-     });
+  // resource.upload({
+  //    Key: outpath,
+  //    Body: params
+  //    }, function(err, data) {
+  //     if (err) return err;
+  //     return 'uploaded successful'
+  //    });
 };
 
 // EVENT DELETE BY DATE OR TIME 
 async function deleteObjects(prefix) {
-
   var params = {
     Prefix: prefix
     }
   await resource.listObjects(params, function(err, data) {
-      if (err) return err;
-      if (data.Contents.length ==0) return;
-      var deleteParams = {
-        Delete: {Objects: []}
-        };
+    if (err) return err;
+    if (data.Contents.length ==0) return;
+    var deleteParams = {
+      Delete: {Objects: []}
+      };
 
-      data.Contents.forEach(({Key}) => {
-        deleteParams.Delete.Objects.push({ Key });
-      });
-      console.log(deleteParams)
-      // await resource.deleteObjects(deleteParams, function(err, data) {
-      //   if (err) return err;
-      //   if(data.IsTruncated) await deleteObjects(path);
-      //   else return;
-      // });
+    data.Contents.forEach(({Key}) => {
+      deleteParams.Delete.Objects.push({ Key });
+    });
+    console.log(deleteParams.Delete.Objects)
+    // await resource.deleteObjects(deleteParams, function(err, data) {
+    //   if (err) return err;
+    //   if(data.IsTruncated) await deleteObjects(path);
+    //   else return;
+    // });
   });
 };
 
-
-var attempt = 3; 
+attempt = 3; 
 // receive message from popup on user input
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
@@ -164,33 +157,41 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           chrome.storage.sync.set({isPaused: true}, function(){});
         } else { 
           alert(msg_final);
-          chrome.runtime.sendMessage({msg: "validation_failure"});
+          // chrome.runtime.sendMessage({message: "validationFailure"});
+          chrome.browserAction.setPopup({popup: ""});
         }     
       }
-  } else if(request.message == "delbyTime") { 
-      // set user id
-      var prefix = request.delbyTime;
-      console.log(prefix.length);
-      if (prefix.length ==1){
-          deleteObjects(prefix[0]);
-      } else if(prefix.length > 1) {
-        for (i=0; i < prefix.length; i++) {
-          deleteObjects(prefix[i])
-        }
+  } else {
+    var prefix;
+    if(request.message == "delbyTime" ) {
+      prefix = request.delbyTime
+    } else if (request.message == "delbyDate" ) {
+      prefix = request.delbyDate
+    }
+    console.log(prefix.length);
+    if (prefix.length ==1) {
+        deleteObjects(prefix[0]);
+    } else if(prefix.length > 1) {
+      for (i=0; i < prefix.length; i++) {
+        deleteObjects(prefix[i])
       }
-      //listObjects(prefix)
-      //console.log(keys)
-      // get user id and  configuration  
-  }
+    }
+  }  
 });
-
 
 chrome.runtime.onStartup.addListener(function () {
   // START UP EVENT
-  loadConfig(xhr)
+  loadConfig(xhr);
     
   chrome.storage.sync.get('userID', function(temp) {
         userID = "" + temp.userID });
+  // check  status
+  chrome.storage.sync.get(['isPaused'], function(temp) {
+    pause = temp.isPaused;
+    if(pause) {
+      chrome.browserAction.setIcon({path: "icon_disabled.png"});
+    } 
+  });
 });
 
 
@@ -222,10 +223,13 @@ chrome.runtime.onInstalled.addListener(function(details) {
       chrome.storage.sync.get('userID', function(temp) {
        userID = "" + temp.userID });
 
-      //console.log(validate)
-
-      // chrome.storage.sync.get(['isPaused'], function(temp) {
-      //   pause = "" + temp.isPaused });
+      // check  status
+      chrome.storage.sync.get(['isPaused'], function(temp) {
+        pause = temp.isPaused;
+        if(pause) {
+          chrome.browserAction.setIcon({path: "icon_disabled.png"});
+        } 
+      });
     };
   });
 
@@ -247,7 +251,9 @@ chrome.runtime.onInstalled.addListener(function(details) {
               m++;
             }
           }
-          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
+
+          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org") || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") || tab.url.toLowerCase().includes( "logout")  || tab.url.toLowerCase().includes("log-in") || tab.url.toLowerCase().includes("mortgage") || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") || tab.url.toLowerCase().includes("ira")
+            || tab.url.toLowerCase().includes("retirem") || tab.url.toLowerCase().includes("tax")) return;
           if (m === 0 ){
            upload(changeInfo.url,'new');
             //console.log("Uploaded");

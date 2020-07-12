@@ -14,7 +14,7 @@ function setUserID() {
   console.log(userInputID, currID)
   if (userInputID === '') { 
     alert(msg);
-  } else if(!(userInputID === currID)) {
+  } else if(!(userInputID == currID)) {
     chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"}); 
   } else {
     chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
@@ -23,10 +23,12 @@ function setUserID() {
 };
 
 
-chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
-  if (request.msg === "validation_failure") {
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log("message passed")
+  if (request.message == "validationFailure") {
+    console.log("message passed")
   //  To do something
-    chrome.browserAction.setIcon({path: "icon_disabled.png"});
+    // chrome.browserAction.setIcon({path: "icon_disabled.png"});
     document.getElementById("userID").disabled = true
     document.getElementById("userInput").disabled = true;
     document.getElementById("btSubmit").disabled = true;
@@ -55,12 +57,11 @@ for (var i = 0; i < remove.length; i++) {
   }
 }
 
-
 //gets nonempty website name to add to blacklist
 function addElement() {
   var inputValue = document.getElementById("userInput").value;
   if (inputValue === '') {
-    alert("You must write something!");
+    alert("Please enter website domain to add to the Blacklist!");
   } else {
     addToBlacklist(inputValue);
   }
@@ -259,7 +260,7 @@ $( function() {
     var date = $("#datepicker1").datepicker("getDate");
     var currID = await getSyncStorageValue('userID');
     currID = '' + currID.userID;
-    console.log("currid: " +  currID);
+    //console.log("currid: " +  currID);
     if (currID === 'undefined') {
       updateTips(".validateTips1", "Please log in with your UserID first.")
     } 
@@ -296,14 +297,14 @@ $( function() {
   });
 
     $("#btDeleteDate").button().removeClass();
-
 // initialize
+
   // const a = getSyncStorageValue('userID');
   // const b = getSyncStorageValue('restrictedDates');
   // Promise.all([a, b]).then(function(values) {
     $( "#btDeleteDate" ).button().on("click", function() {
+      $(".validateTips1").text("Select a date on which you wish to delete history.");
       dialog1.dialog('open');
-      
       $( "#datepicker1" ).datepicker({
         showOtherMonths: true,
         selectOtherMonths:true,
@@ -325,35 +326,79 @@ $( function() {
 // Delete history by time range   
   async function getDateTime(){
     var date = $("#datepicker2").datepicker("getDate");
-    var startTime = $("#startTime").timepicker("getTime"); // instance of Date
-    var endTime = $("#endTime").timepicker("getTime"); 
+    var startTime = $("#startTime").val(); // instance of Date
+    var endTime = $("#endTime").val(); 
+    var singleTime = $("#singleTime").val();
     var currID = await getSyncStorageValue('userID');
     currID = '' + currID.userID;
-    //console.log("currid: "+  currID);
     if (currID === 'undefined') {
       updateTips(".validateTips2", "Please log in with your UserID first.")
     } 
     // else if (restrictedDates.length === 7) {
     //   updateTips(".validateTips2", "You have no browse history to delete!");
     // } 
-    else if (date !== null && startTime !== null && endTime !== null) {
-        var timeRange = formatDateTime(currID, date, starttime=startTime, endtime=endTime)
-
-        // var fEndTime = formatDateTime(currID, date, endTime);
+    else if (date !== null) {
+      if (startTime !== '' && endTime !== '' && startTime <= endTime){
+        var timeRange = formatDateTime(currID, date, starttime=startTime, endtime=endTime);
+        console.log(timeRange);
+        chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
+        $.datepicker._clearDate("#datepicker2");
+        dialog2.dialog( "close" );
         // if (endTime.getHours() - startTime.getHours() === 23) {
         //   console.log("delete date");
         //   restrictedDates.push($.datepicker.formatDate('yy-mm-dd', date));
         // }
-        chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
 
         // chrome.runtime.sendMessage({delbyTime : [fStartTime, fEndTime], message:'delbyTime'});
+      } else if (singleTime !== '') {
+        var timeSingle = formatDateTime(currID, date, starttime=singleTime, endTime = '');
+        console.log(timeSingle);
+        chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
         $.datepicker._clearDate("#datepicker2");
         dialog2.dialog( "close" );
-
+      } else {  
+      updateTips(".validateTips2","Please select a valid input.")
+      }
     } else {  
-      updateTips(".validateTips2","Please select a valid date.")
+      updateTips(".validateTips2","Please select a valid input.")
     }
+    
   }
+
+  function launchTime() {
+    // $.datepicker._clearDate("#datepicker2");  
+    $(".validateTips2").text("Select a date on which you wish to delete history.");
+    $( "#datepicker2" ).datepicker({
+          showOtherMonths: true,
+          selectOtherMonths: true,
+          minDate: -6, maxDate: 0
+          // beforeShowDay: function(date) {
+          //   var string = $.datepicker.formatDate('yy-mm-dd', date);
+          //   return [restrictedDates.indexOf(string) == -1];
+          // }
+        }).blur(); 
+    $('#singleTime').prop('disabled', false);
+    $("#startTime").prop('disabled', false);
+    $("#endTime").prop('disabled', false);
+    $("#startTime").val('');
+    $("#endTime").val('');
+    $("#singleTime").val('');
+
+    $("#startTime").change(function() {
+      $("#endTime option").removeAttr('disabled');
+      var value = $("#startTime option:selected").val();
+      if (value === '') return;
+      for (var i = 0; i <= value; i++){
+        $("#endTime option[value="+ i +"]").attr('disabled','disabled');
+      }
+      $('#singleTime').prop('disabled', true);
+    });
+
+    $("#singleTime").change(function() {
+      $('#endTime').prop('disabled', true);
+      $('#startTime').prop('disabled',true);
+    });
+    }
 
     dialog2 = $( "#deleteByTimeForm" ).dialog({
         autoOpen: false,
@@ -363,6 +408,11 @@ $( function() {
         buttons: [
           {text: "Delete",
            click: getDateTime},
+           {text: "Reset",
+           click: function (){
+            $.datepicker._clearDate("#datepicker2");
+            launchTime();}
+           },
           {text: "Cancel",
           click: function() {
             $.datepicker._clearDate("#datepicker2");
@@ -371,40 +421,13 @@ $( function() {
         ]
     });
 
-    $( "#btDeleteTime").button().on("click", function() {
+    $("#btDeleteTime").button().removeClass();
+    $("#btDeleteTime").button().on("click", function() {
       dialog2.dialog( "open" );
-      $( "#datepicker2" ).datepicker({
-        showOtherMonths: true,
-        selectOtherMonths: true,
-        minDate: -6, maxDate: 0
-        // beforeShowDay: function(date) {
-        //   var string = $.datepicker.formatDate('yy-mm-dd', date);
-        //   return [restrictedDates.indexOf(string) == -1];
-        // }
-      }).blur(); 
-
-      $("#startTime").timepicker({
-          'step' : 60,
-          'useSelect' : true
-      });
-
-      $("#endTime").timepicker({
-        'step' : 60,
-        'useSelect' : true
-      });
-
-      $("#startTime").on('changeTime', function() {
-        $('#endTime').timepicker('option', {
-          'disableTimeRanges' : [["12am", $("#startTime").val()]]
-        });
-      });
-    });
-
+      launchTime();
   });
 
-
-
-
+});
 
 //link buttons to appropriate functions once website is loaded
 window.addEventListener('DOMContentLoaded', (event) => {
