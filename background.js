@@ -14,7 +14,6 @@ var pause;
 var config;
 var date;
 var validate;
-var attempt;
 
 function containsObject(obj, list) {
     var i;
@@ -73,15 +72,15 @@ function createPath(msg) {
     return (val<10) ? '0' + val : val;
   }
 
-  // SET ACCESS TIME 
-  var day = date.toISOString().split('T')[0].replace(/-/g, '/')
-  var file = date.toISOString().split('T')[0].replace(/-/g, '_')
+    // SET LOCAL ACCESS TIME 
+  var year = date.getFullYear();
+  var month = pad(date.getMonth() + 1);
+  var day = date.getDate();
   var hour = pad(date.getHours());
   var minute = pad(date.getMinutes());
-  var seconds = date.getSeconds()
-
-  // create object key
-  filepath = [userID, day, hour, ''].join('/') + [userID, file, hour, minute, seconds].join('_')
+  var seconds = pad(date.getSeconds());
+  // // create object key
+  filepath = [userID, year, month, day, hour, ''].join('/') + [userID, year, month, day, hour, minute, seconds].join('_')
 
   if(pause){ 
     return  filepath + '_paused.json';
@@ -104,13 +103,13 @@ function upload(url, msg) {
   timestamp: date.getTime()
   });
   console.log(outpath, params)
-  // resource.upload({
-  //    Key: outpath,
-  //    Body: params
-  //    }, function(err, data) {
-  //     if (err) return err;
-  //     return 'uploaded successful'
-  //    });
+  resource.upload({
+     Key: outpath,
+     Body: params
+     }, function(err, data) {
+      if (err) return err;
+      return 'uploaded successful'
+     });
 };
 
 // EVENT DELETE BY DATE OR TIME 
@@ -129,15 +128,15 @@ async function deleteObjects(prefix) {
       deleteParams.Delete.Objects.push({ Key });
     });
     console.log(deleteParams.Delete.Objects)
-    // await resource.deleteObjects(deleteParams, function(err, data) {
-    //   if (err) return err;
-    //   if(data.IsTruncated) await deleteObjects(path);
-    //   else return;
-    // });
+    resource.deleteObjects(deleteParams, function(err, data) {
+      if (err) return err;
+      if(data.IsTruncated) deleteObjects(path);
+      else return;
+    });
   });
 };
 
-attempt = 3; 
+var attempt = 3; 
 // receive message from popup on user input
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
@@ -252,8 +251,18 @@ chrome.runtime.onInstalled.addListener(function(details) {
             }
           }
 
-          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org") || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") || tab.url.toLowerCase().includes( "logout")  || tab.url.toLowerCase().includes("log-in") || tab.url.toLowerCase().includes("mortgage") || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") || tab.url.toLowerCase().includes("ira")
-            || tab.url.toLowerCase().includes("retirem") || tab.url.toLowerCase().includes("tax")) return;
+          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org") 
+            || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
+            || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
+            || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
+            || tab.url.toLowerCase().includes("account") 
+            || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
+            || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
+            || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
+            || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") 
+            || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") 
+            || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
+            || tab.url.toLowerCase().includes("tax")) return;
           if (m === 0 ){
            upload(changeInfo.url,'new');
             //console.log("Uploaded");
