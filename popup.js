@@ -268,16 +268,19 @@ $( function() {
     } 
     // else if (restrictedDates.length === 7) {
     //   updateTips(".validateTips1", "You have no browse history to delete!");
-    // } 
+    // }
     else if (date !== null && date instanceof Date) {
       var formattedDate = formatDateTime(currID, date,starttime='',endtime='');
       //setRestrictedDates(date);
-      chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
-      $.datepicker._clearDate("#datepicker1");
-      $(this).dialog( "close" );
+      if(confirm("You are about to delete all history on (yyyy/mm/dd): \n\n" + formattedDate[0].substring(formattedDate[0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+        console.log(formattedDate[0]);
+        chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
+        $.datepicker._clearDate("#datepicker1");
+        $(this).dialog( "close" );
+      }
     } else {  
-      updateTips(".validateTips1","Please select a valid date.")
-    }
+      updateTips("#validateTips1","Please select a valid date.")
+    } 
   }
 
 // Dialog and button action assignments
@@ -339,12 +342,15 @@ $( function() {
     //   updateTips(".validateTips2", "You have no browse history to delete!");
     // } 
     else if (date !== null) {
-      if (startTime !== '' && endTime !== '' && startTime <= endTime){
+      if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
         var timeRange = formatDateTime(currID, date, starttime=startTime, endtime=endTime);
         console.log(timeRange);
-        chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
-        $.datepicker._clearDate("#datepicker2");
-        dialog2.dialog( "close" );
+        if(confirm("You are about to delete history in the following time frame (inclusive; 24-hour clock): \n\n   from (yyyy/mm/dd/hh): " + timeRange[0].substring(timeRange[0].indexOf("/") + 1) + "\n   to (yyyy/mm/dd/hh): " + timeRange[timeRange.length-1].substring(timeRange[timeRange.length-1].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+          console.log(timeRange);
+          chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
+          $.datepicker._clearDate("#datepicker2");
+          dialog2.dialog( "close" );
+        }
         // if (endTime.getHours() - startTime.getHours() === 23) {
         //   console.log("delete date");
         //   restrictedDates.push($.datepicker.formatDate('yy-mm-dd', date));
@@ -353,22 +359,23 @@ $( function() {
         // chrome.runtime.sendMessage({delbyTime : [fStartTime, fEndTime], message:'delbyTime'});
       } else if (singleTime !== '') {
         var timeSingle = formatDateTime(currID, date, starttime=singleTime, endTime = '');
-        console.log(timeSingle);
-        chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
-        $.datepicker._clearDate("#datepicker2");
-        dialog2.dialog( "close" );
+        if(confirm("You are about to delete history of the following hour (24-hour clock; yyyy/mm/dd/hh): \n\n" + timeSingle[0].substring(timeSingle [0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+          console.log(timeSingle);
+          chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
+          $.datepicker._clearDate("#datepicker2");
+          dialog2.dialog( "close" );
+        }
       } else {  
-      updateTips(".validateTips2","Please select a valid input.")
+        updateTips("#validateTips2","Please select a valid time frame.")
       }
     } else {  
-      updateTips(".validateTips2","Please select a valid input.")
+      updateTips("#validateTips2","Please select a valid time frame.")
     }
-    
   }
 
   function launchTime() {
     // $.datepicker._clearDate("#datepicker2");  
-    $(".validateTips2").text("Select a date on which you wish to delete history.");
+    $("#validateTips2").text("Select a time frame to delete history. ");
     $( "#datepicker2" ).datepicker({
           showOtherMonths: true,
           selectOtherMonths: true,
@@ -384,6 +391,7 @@ $( function() {
     $("#startTime").val('');
     $("#endTime").val('');
     $("#singleTime").val('');
+    
 
     $("#startTime").change(function() {
       $("#endTime option").removeAttr('disabled');
@@ -399,12 +407,13 @@ $( function() {
       $('#endTime').prop('disabled', true);
       $('#startTime').prop('disabled',true);
     });
+
     }
 
     dialog2 = $( "#deleteByTimeForm" ).dialog({
         autoOpen: false,
-        height: 250,
-        width: 220,
+        height: 267,
+        width: 330,
         modal: true,
         buttons: [
           {text: "Delete",
