@@ -201,8 +201,6 @@ $( function() {
     // SET LOCAL TIME
     var day = [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join('/')
 
-    console.log(day)
-
     if (starttime == '' && endtime == '') {
       return [[currID, day].join('/')]
     } else if (starttime !== '' && endtime == '') {
@@ -273,7 +271,6 @@ $( function() {
     // } 
     else if (date !== null && date instanceof Date) {
       var formattedDate = formatDateTime(currID, date,starttime='',endtime='');
-      console.log(formattedDate[0]);
       //setRestrictedDates(date);
       chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
       $.datepicker._clearDate("#datepicker1");
