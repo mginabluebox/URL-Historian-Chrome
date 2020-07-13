@@ -198,7 +198,11 @@ $( function() {
     }
     var startTime;
     var endTime; 
-    var day = date.toISOString().split('T')[0].replace(/-/g, '/');
+    // SET LOCAL TIME
+    var day = [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join('/')
+
+    console.log(day)
+
     if (starttime == '' && endtime == '') {
       return [[currID, day].join('/')]
     } else if (starttime !== '' && endtime == '') {
