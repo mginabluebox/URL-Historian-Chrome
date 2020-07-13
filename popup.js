@@ -196,7 +196,7 @@ $( function() {
     }
     var startTime;
     var endTime; 
-    // SET LOCAL TIME
+    // GET LOCAL TIME
     var day = [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join('/')
 
     if (starttime == '' && endtime == '') {
@@ -270,7 +270,7 @@ $( function() {
     else if (date !== null && date instanceof Date) {
       var formattedDate = formatDateTime(currID, date,starttime='',endtime='');
       //setRestrictedDates(date);
-      if(confirm("You are about to delete all history on (yyyy/mm/dd): \n\n" + formattedDate[0].substring(formattedDate[0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+      if(confirm("You are about to delete all history on (yyyy/mm/dd):\n\n" + formattedDate[0].substring(formattedDate[0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
         console.log(formattedDate[0]);
         chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
         $.datepicker._clearDate("#datepicker1");
@@ -304,7 +304,7 @@ $( function() {
   // const b = getSyncStorageValue('restrictedDates');
   // Promise.all([a, b]).then(function(values) {
     $( "#btDeleteDate" ).button().on("click", function() {
-      $(".validateTips1").text("Select a date on which you wish to delete history.");
+      $("#validateTips1").text("Select a date on which you wish to delete history.");
       dialog1.dialog('open');
       $( "#datepicker1" ).datepicker({
         showOtherMonths: true,
@@ -341,7 +341,7 @@ $( function() {
       if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
         var timeRange = formatDateTime(currID, date, starttime=startTime, endtime=endTime);
         console.log(timeRange);
-        if(confirm("You are about to delete history in the following time frame (inclusive; 24-hour clock): \n\n   from (yyyy/mm/dd/hh): " + timeRange[0].substring(timeRange[0].indexOf("/") + 1) + "\n   to (yyyy/mm/dd/hh): " + timeRange[timeRange.length-1].substring(timeRange[timeRange.length-1].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+        if(confirm("You are about to delete history in the following time frame (inclusive; 24-hour clock):\n\n from (yyyy/mm/dd/hh): " + timeRange[0].substring(timeRange[0].indexOf("/") + 1) + "\n   to (yyyy/mm/dd/hh): " + timeRange[timeRange.length-1].substring(timeRange[timeRange.length-1].indexOf("/") + 1) + "\n\nClick OK to continue.")){
           console.log(timeRange);
           chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
           $.datepicker._clearDate("#datepicker2");
