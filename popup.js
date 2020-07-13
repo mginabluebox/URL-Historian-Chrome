@@ -24,9 +24,7 @@ function setUserID() {
 
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  console.log("message passed")
   if (request.message == "validationFailure") {
-    console.log("message passed")
   //  To do something
     // chrome.browserAction.setIcon({path: "icon_disabled.png"});
     document.getElementById("userID").disabled = true
@@ -302,7 +300,6 @@ $( function() {
 
     $("#btDeleteDate").button().removeClass();
 // initialize
-
   // const a = getSyncStorageValue('userID');
   // const b = getSyncStorageValue('restrictedDates');
   // Promise.all([a, b]).then(function(values) {
@@ -323,7 +320,6 @@ $( function() {
         //   return [restricted.indexOf(string) == -1];
         // }
       }).blur(); 
-
     });
   // });
 
