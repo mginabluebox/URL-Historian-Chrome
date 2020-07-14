@@ -202,10 +202,9 @@ input:checked + .slider:before {
 fieldset {
   border: 1px solid grey;
   border-radius: 6px;
-  padding-left: 0.3em;
-  padding-right: 0.3em;
-  vertical-align: middle;
-  margin: 2px;
+  padding: 0 0.2em 0.4em 0.2em;
+  margin: 1px;
+  float: left;
 }
 
 button {
