@@ -2,7 +2,6 @@
 console.log('Welcome to Url historian');
 
 //MESSAGES 
-
 valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\t 1. Click the URL Historian icon\n\t 2. Slide the option button to the left.\nTo delete browse history\n\tby Date\n\t\t1. Click by Date button\n\t\t2. Select a date within the past seven days \n\t\t3. Click delete button\n\t\t4. Confirm deletion date\n\tby Time\n\t\t1. Click by Time button\n\t\t2. Select a date within the past seven days\n\t\t3. Click delete button\n\t\t4. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the website domain in Blacklist a website\n\t2. Press add button\nTo remove a website from current Blacklist\n\tClick X next to the website\nFor more information about research at CSMaP please read the redirected page"
 
 msg_retry = "Welcome and thank your for installing URL historian!!\n\nUnfortunately the user ID you entered cannot be verified\n\nPlease check and try again"
