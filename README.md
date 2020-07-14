@@ -22,7 +22,7 @@ Your extensions installation and setup are complete. If you decide to pause the 
 At the completion of the research process, your activity no longer will be recorded. You can uninstall the extension from your computer by clicking on the icon on the toolbar and (requirements found in the appropriate web store)
 ### Delete collected data
 * Delete data collected under the current user ID. You must log in first before proceeding to the following process.
-* We currently allow data deletion in the past 7 days. You can request data deletion beyond the 7-day time frame by contacting CSMaP research team.)
+* We currently allow data deletion in the past 7 days. (You can request data deletion beyond the 7-day time frame by contacting CSMaP research team.)
 1. Delete by date
    - Click on the **by Date** button.
    - Select a date on which you wish to delete your browse activities.
