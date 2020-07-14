@@ -2,11 +2,12 @@
 console.log('Welcome to Url historian');
 
 //MESSAGES 
-valid_msg = "Welcome and thank you for your participation!!\n\nUrl historian is now active on your browser\n\nTo pause activity\n\t 1. Click the Url Historian icon\n\t 2. Slide the option button to the left.\nFor websites you wish to exclude\n\t1. Enter the website domain in Blacklist a website\n\t2. Press add button\nTo remove a website from current Blacklist\n\tClick X next to the website\nFor more information about research at CSMaP please read the redirected page"
 
-msg_retry = "Welcome and thank your for installing Url historian!!\n\nUnfortunately the user ID you entered cannot be verified\n\nPlease check and try again"
+valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\t 1. Click the URL Historian icon\n\t 2. Slide the option button to the left.\nTo delete browse history\n\tby Date\n\t\t1. Click by Date button\n\t\t2. Select a date within the past seven days \n\t\t3. Click delete button\n\t\t4. Confirm deletion date\n\tby Time\n\t\t1. Click by Time button\n\t\t2. Select a date within the past seven days\n\t\t3. Click delete button\n\t\t4. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the website domain in Blacklist a website\n\t2. Press add button\nTo remove a website from current Blacklist\n\tClick X next to the website\nFor more information about research at CSMaP please read the redirected page"
 
-msg_final = "Thank you for your interest in Url Historian\n Unfortunately, multiple attempts to verify the user ID provided have failed\n\nIf you have been recruited to participate in research by CSMaP or our affiliated institution\nPlease contact personell at csmap.org for assistance.\n\nOtherwise only recruited research participants are authorized to use this application\nIf you would like to participate in a study, Please contact personell above.\n\nThis application will now be disabled\nPlease remove the extension from your browser\n\n"
+msg_retry = "Welcome and thank your for installing URL historian!!\n\nUnfortunately the user ID you entered cannot be verified\n\nPlease check and try again"
+
+msg_final = "Thank you for your interest in URL Historian\n Unfortunately, multiple attempts to verify the user ID provided have failed\n\nIf you have been recruited to participate in research by CSMaP or our affiliated institution\nPlease contact personell at csmap.org for assistance.\n\nOtherwise only recruited research participants are authorized to use this application\nIf you would like to participate in a study, Please contact personell above.\n\nThis application will now be disabled\nPlease remove the extension from your browser\n\n"
 
 var userID ;
 var resource;
@@ -72,7 +73,7 @@ function createPath(msg) {
     return (val<10) ? '0' + val : val;
   }
 
-    // SET LOCAL ACCESS TIME 
+  // SET LOCAL ACCESS TIME 
   var year = date.getFullYear();
   var month = pad(date.getMonth() + 1);
   var day = date.getDate();
@@ -82,18 +83,16 @@ function createPath(msg) {
   // // create object key
   filepath = [userID, year, month, day, hour, ''].join('/') + [userID, year, month, day, hour, minute, seconds].join('_')
 
-  if(pause){ 
+  if (msg ==='pause') {
     return  filepath + '_paused.json';
-  } else if(!pause){
-    if (msg === 'new') {
+  } else if(msg === 'new') {
       return filepath + '.json' 
-    } else if (msg === 'blacklisted') {
+  } else if (msg === 'blacklisted') {
      return  filepath + '_' + msg + '.json'
-    }
-  } 
+  }
 };
 
-// EVENT UPLOAD
+// UPLOAD TO S3
 function upload(url, msg) {
   date = new Date()
   var outpath = createPath(msg);
@@ -112,7 +111,7 @@ function upload(url, msg) {
      });
 };
 
-// EVENT DELETE BY DATE OR TIME 
+// DELETE BY DATE OR TIME 
 async function deleteObjects(prefix) {
   var params = {
     Prefix: prefix
@@ -137,14 +136,13 @@ async function deleteObjects(prefix) {
 };
 
 var attempt = 3; 
-// receive message from popup on user input
+// RECEIVE MESSAGE FROM POPUP ON USER INPUT
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
-    // set user id
-    userID = request.userID;
-    // get user id and  configuration  
-  
-    //VERIFY USER  CREDENTIALS         
+    // SET USER ID
+    userID = request.userID;  
+
+    //VERIFY USER CREDENTIALS         
     if (containsObject(userID, validate)) {
         chrome.tabs.create({url: "https://csmapnyu.org"});
       } else {
@@ -167,7 +165,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     } else if (request.message == "delbyDate" ) {
       prefix = request.delbyDate
     }
-    console.log(prefix.length);
+    // console.log(prefix.length);
     if (prefix.length ==1) {
         deleteObjects(prefix[0]);
     } else if(prefix.length > 1) {
@@ -250,12 +248,12 @@ chrome.runtime.onInstalled.addListener(function(details) {
               m++;
             }
           }
-
+          // BLACKLIST HEALTH, FINANCIAL, EMPLOYEE,TAX  
           if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org") 
             || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
             || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
             || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
-            || tab.url.toLowerCase().includes("account") 
+            || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("mail")
             || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
             || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
             || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
@@ -265,13 +263,13 @@ chrome.runtime.onInstalled.addListener(function(details) {
             || tab.url.toLowerCase().includes("tax")) return;
           if (m === 0 ){
            upload(changeInfo.url,'new');
-            //console.log("Uploaded");
           } else {
-            console.log("Blacklisted");
             upload("blacklist", "blacklisted")
             return;
           }
         });
+      } else if(pause) {
+        upload("paused", "pause")
       }
     });
   });

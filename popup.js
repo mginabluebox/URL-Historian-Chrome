@@ -8,7 +8,7 @@ function setUserID() {
   var userInputID = "" + document.getElementById("userID").value;
   chrome.storage.sync.get('userID', function(temp) {
     currID = "" + temp.userID; 
-    console.log(currID);
+    // console.log(currID);
   });
 
   console.log(userInputID, currID)
