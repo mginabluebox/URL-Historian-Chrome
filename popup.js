@@ -271,7 +271,7 @@ $( function() {
       var formattedDate = formatDateTime(currID, date,starttime='',endtime='');
       //setRestrictedDates(date);
       if(confirm("You are about to delete all history on (yyyy/mm/dd):\n\n" + formattedDate[0].substring(formattedDate[0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
-        console.log(formattedDate[0]);
+        // console.log(formattedDate[0]);
         chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
         $.datepicker._clearDate("#datepicker1");
         $(this).dialog( "close" );
@@ -340,9 +340,9 @@ $( function() {
     else if (date !== null) {
       if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
         var timeRange = formatDateTime(currID, date, starttime=startTime, endtime=endTime);
-        console.log(timeRange);
+        // console.log(timeRange);
         if(confirm("You are about to delete history in the following time frame (inclusive; 24-hour clock):\n\n from (yyyy/mm/dd/hh): " + timeRange[0].substring(timeRange[0].indexOf("/") + 1) + "\n   to (yyyy/mm/dd/hh): " + timeRange[timeRange.length-1].substring(timeRange[timeRange.length-1].indexOf("/") + 1) + "\n\nClick OK to continue.")){
-          console.log(timeRange);
+          // console.log(timeRange);
           chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
           $.datepicker._clearDate("#datepicker2");
           dialog2.dialog( "close" );
@@ -356,7 +356,7 @@ $( function() {
       } else if (singleTime !== '') {
         var timeSingle = formatDateTime(currID, date, starttime=singleTime, endTime = '');
         if(confirm("You are about to delete history of the following hour (24-hour clock; yyyy/mm/dd/hh): \n\n" + timeSingle[0].substring(timeSingle [0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
-          console.log(timeSingle);
+          // console.log(timeSingle);
           chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
           $.datepicker._clearDate("#datepicker2");
           dialog2.dialog( "close" );
