@@ -251,8 +251,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
           }
           // BLACKLIST HEALTH, FINANCIAL, EMPLOYEE,TAX  
           if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
-
-          // THIS WAS THE BLACKLISTING OF SITES TO AVOID GETTING SENSITIVE INFORMATION 
+          // UNCOMMENT BELOW TO BLACKLIST SITES THAT WILL HAVE THE TERMS IN THE URL
             // || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
             // || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
             // || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
