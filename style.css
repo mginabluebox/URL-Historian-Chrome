@@ -101,14 +101,11 @@ input:checked + .slider:before {
 
 .e {
   grid-area: 1 / 1 / span 1 / span 3;
-  position: relative;
   line-height: 10px;
   margin-left: 50px;
   opacity: 0.9;
   filter: brightness();
   background-color: snow;
-  vertical-align: center;
-  display: inline;
 }
 
 .f {
@@ -131,63 +128,33 @@ input:checked + .slider:before {
 #btSubmit + #btAdd {
   position: absolute;
   right: 20px;
-  outline:0;
-}
-
-#btSubmit:active {
-  font-style: oblique;
-}
-
-#btSubmit:hover {
-  background-color: #BF94E4;
-}
-
-#btAdd:active {
-  outline: none;
-  font-style: oblique;
-  border-radius: 8px;
-}
-
-#btAdd:hover {
-  background-color: #BF94E4;
 }
 
 #btDeleteDate  {
   margin-top: 1px;
   position: absolute;
-  right: 80px;
-  outline:0;
-  padding: 8px 5px;
+  right: 75px;
   display: inline-block;
-  font-size: 18px;
-  border-radius: 7px;
 }
 
 #btDeleteTime {
   margin-top: 1px;
   position: absolute;
-  right: 1px;
-  outline:0;
-  padding: 8px 5px;
+  right: 2px;
   display: inline-block;
-  font-size: 18px;
-  border-radius: 7px;
 }
 
-#btDeleteDate:hover {
-  background-color: #BF94E4;
+#btHelp{
+  padding:2px;
+  padding-left:4px;
+  margin-top:14px !important;
+  margin-right:8px !important;
+  font-size:12px;
+  border-width:1.5px;
 }
 
-#btDeleteTime:hover {
-  background-color: #BF94E4;
-}
-
-#btDeleteDate:active {
-  font-style: oblique;
-}
-
-#btDeleteTime:active {
-  font-style: oblique;
+.timezone {
+  width: 93px !important;
 }
 
 .validateTips { 
@@ -204,7 +171,7 @@ fieldset {
   border-radius: 6px;
   padding: 0 0.2em 0.4em 0.2em;
   margin: 1px;
-  float: left;
+  float:left;
 }
 
 button {
@@ -215,11 +182,20 @@ button {
   display: inline-block;
   margin: 1px 1px;
   font-size: 16px;
-  border-radius: 5px;
+  border-radius: 6px;
+}
+
+button:hover{
+  background-color: #BF94E4;
+}
+
+button:active {
+  font-style: oblique;
+  border-radius: 8px;
 }
 
 input  {
-  border-radius: 5px;
+  border-radius: 6px;
   border: 2px double #008081;
   background-color: whitesmoke;
   font-style: italic;
@@ -239,10 +215,6 @@ body {
   display: grid;
 }
 
-h2 {
-  margin-top: 8px;
-}
-
 ul {
   color: #008081;
   list-style-type: none;
@@ -252,6 +224,7 @@ li {
   margin-left: -30px;
   margin-top: -8px;
 }
+
 .c label {
   width:208px;
   display:inline-block;
@@ -263,17 +236,15 @@ li {
   padding: 8px 10px;
 }
 
-h2.img-title {
-  position: absolute;
-  left: 12%;
+h3 {
+  float:left;
+  font-size:20px;
 }
 
-figure {
+#csmap-icon {
   position: absolute;
-  left: -32px;
+  left: -50px;
   display: inline;
-  margin-top: -1px;
-  
 }
 
 .remove {

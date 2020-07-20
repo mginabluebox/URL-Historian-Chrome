@@ -232,7 +232,7 @@ $( function() {
     //console.log("currid: " +  currID);
     // ENSURE USER IS LOGGED IN
     if (currID === 'undefined') {
-      updateTips(".validateTips1", "Please log in with your UserID first.")
+      updateTips("#validateTips1", "Please log in with your UserID first.")
     } 
     else if (date !== null && date instanceof Date) {
       var formattedDate = formatDateTime(currID, date,starttime='',endtime='');
@@ -244,15 +244,15 @@ $( function() {
         $(this).dialog( "close" );
       }
     } else {  
-      updateTips("#validateTips1","Please select a valid date.")
+      updateTips("#validateTips1","Please select a valid date.");
     } 
   }
 
   // Dialog window config
   dialog1 = $( "#deleteByDateForm" ).dialog({
       autoOpen: false,
-      height: 200,
-      width: 180,
+      height: 230,
+      width: 200,
       modal: true,
       buttons: [
           {text: "Delete",
@@ -288,7 +288,7 @@ $( function() {
     currID = '' + currID.userID;
 
     if (currID === 'undefined') {
-      updateTips(".validateTips2", "Please log in with your UserID first.")
+      updateTips("#validateTips2", "Please log in with your UserID first.")
     } 
     else if (date !== null) {
       // DELETE BY HOUR RANGE
@@ -362,7 +362,7 @@ $( function() {
   dialog2 = $( "#deleteByTimeForm" ).dialog({
       autoOpen: false,
       height: 267,
-      width: 330,
+      width: 359,
       modal: true,
       buttons: [
         {text: "Delete",
@@ -380,14 +380,27 @@ $( function() {
       ]
   });
 
-  // Initilize by Time 
+  // Initialize by Time 
   $("#btDeleteTime").button().removeClass();
   $("#btDeleteTime").button().on("click", function() {
     dialog2.dialog( "open" );
     launchTime();
   });
 
+// <---- Help button ---->
+  // Initialize Help
+  $("#btHelp").button().removeClass();
+  $("#btHelp").button().on("click", function(){
+    alert("To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select a date within the past seven days \n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select a date and time frame within the past seven days\n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the website domain in \"Blacklist a website\"\n\t2. Press \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP, please visit https://csmapnyu.org/");
+  });
+
+// <--- Time Zone --->
+  $("#timezone").on("change", function() { 
+
+  });
+
 });
+
 
 //link buttons to appropriate functions once website is loaded
 window.addEventListener('DOMContentLoaded', (event) => {

@@ -2,7 +2,7 @@
 console.log('Welcome to Url historian');
 
 //MESSAGES 
-valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\t 1. Click the URL Historian icon\n\t 2. Slide the option button to the left.\nTo delete browse history\n\tby Date\n\t\t1. Click by Date button\n\t\t2. Select a date within the past seven days \n\t\t3. Click delete button\n\t\t4. Confirm deletion date\n\tby Time\n\t\t1. Click by Time button\n\t\t2. Select a date within the past seven days\n\t\t3. Click delete button\n\t\t4. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the website domain in Blacklist a website\n\t2. Press add button\nTo remove a website from current Blacklist\n\tClick X next to the website\nFor more information about research at CSMaP please read the redirected page"
+valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select a date within the past seven days \n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select a date and time frame within the past seven days\n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the website domain in \"Blacklist a website\"\n\t2. Press \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP please read the redirected page"
 
 msg_retry = "Welcome and thank your for installing URL historian!!\n\nUnfortunately the user ID you entered cannot be verified\n\nPlease check and try again"
 
@@ -50,6 +50,7 @@ function loadConfig(xhr) {
         getObject(data);
   });
 }
+
 // LOAD FILE 
 var xhr = new XMLHttpRequest();
 xhr.open("GET", chrome.extension.getURL("/.config.json"), true);
@@ -72,13 +73,14 @@ function createPath(msg) {
     return (val<10) ? '0' + val : val;
   }
 
-  // SET LOCAL ACCESS TIME 
-  var year = date.getFullYear();
-  var month = pad(date.getMonth() + 1);
-  var day = date.getDate();
-  var hour = pad(date.getHours());
-  var minute = pad(date.getMinutes());
-  var seconds = pad(date.getSeconds());
+  // SET LOCAL ACCESS TIME IN UTC
+  var year = date.getUTCFullYear();
+  var month = pad(date.getUTCMonth() + 1);
+  var day = date.getUTCDate();
+  var hour = pad(date.getUTCHours());
+  var minute = pad(date.getUTCMinutes());
+  var seconds = pad(date.getUTCSeconds());
+
   // // create object key
   filepath = [userID, year, month, day, hour, ''].join('/') + [userID, year, month, day, hour, minute, seconds].join('_')
 
@@ -98,7 +100,7 @@ function upload(url, msg) {
   var params= JSON.stringify({
   ID: userID,
   visited_url: url,
-  timestamp: date.getTime()
+  timestamp: date.getTime() // UTC
   });
   console.log(outpath, params)
   resource.upload({
