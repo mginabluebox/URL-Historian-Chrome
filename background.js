@@ -250,18 +250,20 @@ chrome.runtime.onInstalled.addListener(function(details) {
             }
           }
           // BLACKLIST HEALTH, FINANCIAL, EMPLOYEE,TAX  
-          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org") 
-            || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
-            || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
-            || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
-            || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("mail")
-            || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
-            || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
-            || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
-            || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") 
-            || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") 
-            || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
-            || tab.url.toLowerCase().includes("tax")) return;
+          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
+
+          // THIS WAS THE BLACKLISTING OF SITES TO AVOID GETTING SENSITIVE INFORMATION 
+            // || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
+            // || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
+            // || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
+            // || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("mail")
+            // || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
+            // || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
+            // || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
+            // || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") 
+            // || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") 
+            // || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
+            // || tab.url.toLowerCase().includes("tax")) return;
           if (m === 0 ){
            upload(changeInfo.url,'new');
           } else {
