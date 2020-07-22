@@ -2,9 +2,9 @@
 console.log('Welcome to Url historian');
 
 //MESSAGES 
-valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select a date within the past seven days \n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select a date and time frame within the past seven days\n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the website domain in \"Blacklist a website\"\n\t2. Press \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP please read the redirected page"
+valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP, please refer to the redirected page"
 
-msg_retry = "Welcome and thank your for installing URL historian!!\n\nUnfortunately the user ID you entered cannot be verified\n\nPlease check and try again"
+msg_retry = "Welcome and thank your for installing URL historian!!\n\nUnfortunately the user ID you entered cannot be verified\n\nPlease check and try again."
 
 msg_final = "Thank you for your interest in URL Historian\n Unfortunately, multiple attempts to verify the user ID provided have failed\n\nIf you have been recruited to participate in research by CSMaP or our affiliated institution\nPlease contact personell at csmap.org for assistance.\n\nOtherwise only recruited research participants are authorized to use this application\nIf you would like to participate in a study, Please contact personell above.\n\nThis application will now be disabled\nPlease remove the extension from your browser\n\n"
 
@@ -14,6 +14,7 @@ var pause;
 var config;
 var date;
 var validate;
+var pausedMins = 60;
 
 function containsObject(obj, list) {
     var i;
@@ -95,21 +96,23 @@ function createPath(msg) {
 
 // UPLOAD TO S3
 function upload(url, msg) {
-  date = new Date()
-  var outpath = createPath(msg);
-  var params= JSON.stringify({
-  ID: userID,
-  visited_url: url,
-  timestamp: date.getTime() // UTC
-  });
-  console.log(outpath, params)
-  resource.upload({
-     Key: outpath,
-     Body: params
-     }, function(err, data) {
-      if (err) return err;
-      return 'uploaded successful'
-     });
+  if (userID !== "undefined" && userID !== "") {
+    date = new Date()
+    var outpath = createPath(msg);
+    var params= JSON.stringify({
+    ID: userID,
+    visited_url: url,
+    timestamp: date.getTime() // UTC
+    });
+    console.log(outpath, params)
+    resource.upload({
+       Key: outpath,
+       Body: params
+       }, function(err, data) {
+        if (err) return err;
+        return 'uploaded successful'
+       });
+  }
 };
 
 // DELETE BY DATE OR TIME 
@@ -159,6 +162,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           chrome.browserAction.setPopup({popup: ""});
         }     
       }
+  } else if (request.message == "resetPausedTime"){
+      pausedMins = 60;
   } else {
     var prefix;
     if(request.message == "delbyTime" ) {
@@ -306,4 +311,12 @@ chrome.runtime.onInstalled.addListener(function(details) {
       });
     });
   });
+//});
+chrome.alarms.onAlarm.addListener(function(alarm) {
+  alert("Url Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open Url Historian, and slide toggle button to the right.)\n\nThank you for contributing to our research!");
+  pausedMins += 30;
+});
+
+
+
 //});

@@ -4,7 +4,7 @@
 //console.log('Hello')
 var currID;
 function setUserID() {
-  var msg = "Welcome to Url his Historian. Please enter your user ID!"
+  var msg = "Welcome to Url Historian. Please enter your User ID!"
   var userInputID = "" + document.getElementById("userID").value;
   chrome.storage.sync.get('userID', function(temp) {
     currID = "" + temp.userID; 
@@ -151,17 +151,44 @@ function writeList(){
   });
 }
 
+// Alarm user how long they have paused the extension
+// First alarm fires 1hr after the extension is paused, and then fires every other 30 mins
+var alarmOnPause = {
+
+        onHandler : function(e) {
+            // chrome.alarms.create("alarmUser", {delayInMinutes: 0.1, periodInMinutes: 0.1} ); // for testing
+            chrome.alarms.create("alarmUser", {delayInMinutes: 60, periodInMinutes: 30} );
+        },
+
+        offHandler : function(e) {
+            chrome.alarms.clear("alarmUser");
+        }
+
+};
+
+
 function pauseExtension(){
-  chrome.storage.sync.get(['isPaused'], function(temp) {
-    var paused = !temp.isPaused;
-    chrome.storage.sync.set({isPaused: paused});
-    var pauseLabel = document.getElementById("lbPause");
-    if(paused){
-      chrome.browserAction.setIcon({path: "icon_disabled.png"});
-      pauseLabel.innerHTML = "Paused";
+  chrome.storage.sync.get(['isPaused', 'userID'], function(temp) {
+    // console.log(temp.userID + " " + temp.isPaused);
+    if (temp.userID === undefined) {
+      document.getElementById("cbPause").checked = false;
+      alert("Welcome to Url Historian. Please log in with your User ID!");
     } else {
-      chrome.browserAction.setIcon({path: "icon128.png"});
-      pauseLabel.innerHTML = "Active";
+      var paused = !temp.isPaused;
+      chrome.storage.sync.set({isPaused: paused});
+      var pauseLabel = document.getElementById("lbPause");
+      if(paused){
+        chrome.browserAction.setIcon({path: "icon_disabled.png"});
+        pauseLabel.innerHTML = "Paused";
+        // CREATE ALARM
+        alarmOnPause.onHandler();
+      } else {
+        chrome.browserAction.setIcon({path: "icon128.png"});
+        pauseLabel.innerHTML = "Active";
+        // CLEAR ALARM
+        alarmOnPause.offHandler();
+        chrome.runtime.sendMessage({message:"resetPausedTime"});
+      }
     }
   });
 }
@@ -183,27 +210,37 @@ $( function() {
 
   // Format user selections into S3 folder paths for data deletion
   // Return an array of ID/yyyy/mm/dd or an array of ID/yyyy/mm/dd/hh
-  function formatDateTime(currID, date, starttime=null, endtime=null) {
-    function pad(val) {
-      return (val<10) ? '0' + val : val;
-    }
+  function formatDateTime(currID, date, timezone, starttime=null, endtime=null) {
     var startTime;
     var endTime; 
-    // GET LOCAL TIME
-    var day = [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join('/')
+    var day = date.toISOString().slice(0, 10);
 
-    if (starttime == '' && endtime == '') {
-      return [[currID, day].join('/')]
-    } else if (starttime !== '' && endtime == '') {
-      startTime = pad(starttime);
-      return [[currID, day, startTime].join('/')]
-    } else if (starttime !== '' && endtime !=='') {
-      startTime = starttime;
-      endTime = endtime;
-      var timeRange =[];
-      for (var hour = startTime; hour <= endTime; hour++) {
-        timeRange.push([currID, day, pad(hour)].join('/'));
+    if (starttime !== '' && endtime == '') {
+      starttime = (starttime<10) ? " 0"+starttime+":00" : " "+starttime+":00";
+      startTime = moment.tz(day+starttime, timezone).utc();
+      // console.log([[currID, startTime.format("YYYY/MM/DD/HH")].join('/')]);
+      return [[currID, startTime.format("YYYY/MM/DD/HH")].join('/')];
+    } else {
+
+      if (starttime == '' && endtime == '') {
+        starttime = ' 00:00';
+        endtime = ' 23:00';
+      } else {
+        starttime = (starttime<10) ? " 0"+starttime+":00" : " "+starttime+":00";
+        endtime = (endtime<10) ? " 0"+endtime+":00" : " "+endtime+":00";
       }
+
+      //CONVERT TO UTC
+      startTime = moment.tz(day+starttime, timezone).utc();
+      endTime = moment.tz(day+endtime, timezone).utc();
+
+      var timeRange = [[currID,startTime.format("YYYY/MM/DD/HH")].join("/")];
+      var time = startTime.clone();
+      while (!time.isSame(endTime)) {
+        time.add(1,"hour");
+        timeRange.push([currID,time.format("YYYY/MM/DD/HH")].join("/"));
+      }
+      // console.log(timeRange);
       return timeRange;
     }
   }
@@ -223,21 +260,146 @@ $( function() {
     });
   }
 
+// <--- Time Zone --->
+// Code modified from https://matall.in/posts/building-an-usable-timezone-selector/
+  const _t = (s) => {
+    if (i18n !== void 0 && i18n[s]) {
+      return i18n[s];
+    }
+    return s;
+  };
+
+  const i18n = {
+    "Etc/GMT+12": "International Date Line West",
+    "Pacific/Midway": "Midway Island, Samoa",
+    "Pacific/Honolulu": "Hawaii",
+    "America/Juneau": "Alaska",
+    "America/Dawson": "Pacific Time (US and Canada); Tijuana",
+    "America/Boise": "Mountain Time (US and Canada)",
+    "America/Chihuahua": "Chihuahua, La Paz, Mazatlan",
+    "America/Phoenix": "Arizona",
+    "America/Chicago": "Central Time (US and Canada)",
+    "America/Regina": "Saskatchewan",
+    "America/Mexico_City": "Guadalajara, Mexico City, Monterrey",
+    "America/Belize": "Central America",
+    "America/New_York": "Eastern Time (US and Canada)",
+    "America/Indiana/Indianapolis": "Indiana (East)",
+    "America/Bogota": "Bogota, Lima, Quito",
+    "America/Glace_Bay": "Atlantic Time (Canada)",
+    "America/Caracas": "Caracas, La Paz",
+    "America/Santiago": "Santiago",
+    "America/St_Johns": "Newfoundland and Labrador",
+    "America/Sao_Paulo": "Brasilia",
+    "America/Argentina/Buenos_Aires": "Buenos Aires, Georgetown",
+    "America/Godthab": "Greenland",
+    "Etc/GMT+2": "Mid-Atlantic",
+    "Atlantic/Azores": "Azores",
+    "Atlantic/Cape_Verde": "Cape Verde Islands",
+    "GMT": "Dublin, Edinburgh, Lisbon, London",
+    "Africa/Casablanca": "Casablanca, Monrovia",
+    "Atlantic/Canary": "Canary Islands",
+    "Europe/Belgrade": "Belgrade, Bratislava, Budapest, Ljubljana, Prague",
+    "Europe/Sarajevo": "Sarajevo, Skopje, Warsaw, Zagreb",
+    "Europe/Brussels": "Brussels, Copenhagen, Madrid, Paris",
+    "Europe/Amsterdam": "Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna",
+    "Africa/Algiers": "West Central Africa",
+    "Europe/Bucharest": "Bucharest",
+    "Africa/Cairo": "Cairo",
+    "Europe/Helsinki": "Helsinki, Kiev, Riga, Sofia, Tallinn, Vilnius",
+    "Europe/Athens": "Athens, Istanbul, Minsk",
+    "Asia/Jerusalem": "Jerusalem",
+    "Africa/Harare": "Harare, Pretoria",
+    "Europe/Moscow": "Moscow, St. Petersburg, Volgograd",
+    "Asia/Kuwait": "Kuwait, Riyadh",
+    "Africa/Nairobi": "Nairobi",
+    "Asia/Baghdad": "Baghdad",
+    "Asia/Tehran": "Tehran",
+    "Asia/Dubai": "Abu Dhabi, Muscat",
+    "Asia/Baku": "Baku, Tbilisi, Yerevan",
+    "Asia/Kabul": "Kabul",
+    "Asia/Yekaterinburg": "Ekaterinburg",
+    "Asia/Karachi": "Islamabad, Karachi, Tashkent",
+    "Asia/Kolkata": "Chennai, Kolkata, Mumbai, New Delhi",
+    "Asia/Kathmandu": "Kathmandu",
+    "Asia/Dhaka": "Astana, Dhaka",
+    "Asia/Colombo": "Sri Jayawardenepura",
+    "Asia/Almaty": "Almaty, Novosibirsk",
+    "Asia/Rangoon": "Yangon Rangoon",
+    "Asia/Bangkok": "Bangkok, Hanoi, Jakarta",
+    "Asia/Krasnoyarsk": "Krasnoyarsk",
+    "Asia/Shanghai": "Beijing, Chongqing, Hong Kong SAR, Urumqi",
+    "Asia/Kuala_Lumpur": "Kuala Lumpur, Singapore",
+    "Asia/Taipei": "Taipei",
+    "Australia/Perth": "Perth",
+    "Asia/Irkutsk": "Irkutsk, Ulaanbaatar",
+    "Asia/Seoul": "Seoul",
+    "Asia/Tokyo": "Osaka, Sapporo, Tokyo",
+    "Asia/Yakutsk": "Yakutsk",
+    "Australia/Darwin": "Darwin",
+    "Australia/Adelaide": "Adelaide",
+    "Australia/Sydney": "Canberra, Melbourne, Sydney",
+    "Australia/Brisbane": "Brisbane",
+    "Australia/Hobart": "Hobart",
+    "Asia/Vladivostok": "Vladivostok",
+    "Pacific/Guam": "Guam, Port Moresby",
+    "Asia/Magadan": "Magadan, Solomon Islands, New Caledonia",
+    "Pacific/Fiji": "Fiji Islands, Kamchatka, Marshall Islands",
+    "Pacific/Auckland": "Auckland, Wellington",
+    "Pacific/Tongatapu": "Nuku'alofa"
+  }
+
+  const timezones = Object.keys(i18n);
+
+  const selectorOptions = moment.tz.names()
+    .filter(tz => {
+      return timezones.includes(tz)
+    })
+    .reduce((memo, tz) => {
+      memo.push({
+        name: tz,
+        offset: moment.tz(tz).utcOffset()
+      });
+      
+      return memo;
+    }, [])
+    .sort((a, b) => {
+      return a.offset - b.offset
+    })
+    .reduce((memo, tz) => {
+      const timezone = tz.offset ? moment.tz(tz.name).format('Z') : '';
+
+      return memo.concat(`<option value="${tz.name}">(UTC${timezone}) ${_t(tz.name)}</option>`);
+    }, "");
+
+  // document.querySelector("#timezone1").innerHTML = ["<option value=''> --Select-- </option>", selectorOptions].join('');
+  document.querySelector("#timezone1").innerHTML = selectorOptions;
+  document.querySelector("#timezone2").innerHTML = selectorOptions;
+
 // <---- Delete history by date ---->
+  // Format date time for confirmation window
+  function formatPrintDateTime(date,time=null) {
+    if (time === null) {
+      return moment(date.toISOString().slice(0,10)).format("LL");
+    }
+   return moment(date.toISOString().slice(0,10) + ((time<10) ? " 0"+time+":00" : " "+ time+":00")).format("LLL");
+  }
   // Get date selected by user
   async function getDateforByDate(values) {
     var date = $("#datepicker1").datepicker("getDate");
     var currID = await getSyncStorageValue('userID');
+    var timezone = $("#timezone1").val();
     currID = '' + currID.userID;
     //console.log("currid: " +  currID);
     // ENSURE USER IS LOGGED IN
     if (currID === 'undefined') {
       updateTips("#validateTips1", "Please log in with your UserID first.")
     } 
-    else if (date !== null && date instanceof Date) {
-      var formattedDate = formatDateTime(currID, date,starttime='',endtime='');
+    else if (date !== null && date instanceof Date && timezone !== '') {
+      var formattedDate = formatDateTime(currID, date, timezone, starttime='',endtime='');
+      var abbr = moment.tz.zone(timezone).abbr(date.getTime());
+      var printDate = formatPrintDateTime(date);
       // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-      if(confirm("You are about to delete all history on (yyyy/mm/dd):\n\n" + formattedDate[0].substring(formattedDate[0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+      if(confirm("You are about to delete all history on:\n\n\t" + printDate+ " " + abbr + "\n\nClick OK to continue.")){
         // console.log(formattedDate[0]);
         chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
         $.datepicker._clearDate("#datepicker1");
@@ -251,8 +413,8 @@ $( function() {
   // Dialog window config
   dialog1 = $( "#deleteByDateForm" ).dialog({
       autoOpen: false,
-      height: 230,
-      width: 200,
+      height: 200,
+      width: 340,
       modal: true,
       buttons: [
           {text: "Delete",
@@ -268,35 +430,43 @@ $( function() {
   // Initialize by Date 
   $("#btDeleteDate").button().removeClass();
   $( "#btDeleteDate" ).button().on("click", function() {
-    $("#validateTips1").text("Select a date on which you wish to delete history.");
+    $("#validateTips1").text("Select a date on which you wish to delete history and the time zone you were in.");
     dialog1.dialog('open');
     $( "#datepicker1" ).datepicker({
       showOtherMonths: true,
       selectOtherMonths:true,
       minDate: -6, maxDate: 0
     }).blur(); 
+    $("#timezone1").val("America/New_York");
+    $("#timezone1").select2();
+
   });
 
 // <---- Delete history by time range ---->
   // Get date and time frame selected by user
   async function getDateTime(){
     var date = $("#datepicker2").datepicker("getDate");
-    var startTime = $("#startTime").val(); // instance of Date
+    var startTime = $("#startTime").val(); 
     var endTime = $("#endTime").val(); 
     var singleTime = $("#singleTime").val();
     var currID = await getSyncStorageValue('userID');
+    var timezone = $("#timezone2").val();
     currID = '' + currID.userID;
 
     if (currID === 'undefined') {
       updateTips("#validateTips2", "Please log in with your UserID first.")
     } 
-    else if (date !== null) {
+    else if (date !== null && timezone !== '') {
       // DELETE BY HOUR RANGE
       if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
-        var timeRange = formatDateTime(currID, date, starttime=startTime, endtime=endTime);
-        // console.log(timeRange);
+        var timeRange = formatDateTime(currID, date, timezone, starttime=startTime, endtime=endTime);
+        
+        var printST = formatPrintDateTime(date, startTime);
+        var printET = formatPrintDateTime(date, endTime);
+        var abbr = moment.tz.zone(timezone).abbr(date.getTime());
+
         // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-        if(confirm("You are about to delete history in the following time frame (inclusive; 24-hour clock):\n\n from (yyyy/mm/dd/hh): " + timeRange[0].substring(timeRange[0].indexOf("/") + 1) + "\n   to (yyyy/mm/dd/hh): " + timeRange[timeRange.length-1].substring(timeRange[timeRange.length-1].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+        if(confirm("You are about to delete history in the following time frame (inclusive):\n\n\tfrom: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nClick OK to continue.")){
           // console.log(timeRange);
           chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
           $.datepicker._clearDate("#datepicker2");
@@ -304,9 +474,12 @@ $( function() {
         }
       // DELETE BY SINGLE HOUR
       } else if (singleTime !== '') {
-        var timeSingle = formatDateTime(currID, date, starttime=singleTime, endTime = '');
+        var timeSingle = formatDateTime(currID, date, timezone, starttime=singleTime, endTime = '');
+
+        var printST = formatPrintDateTime(date,singleTime);
+        var abbr = moment.tz.zone(timezone).abbr(date.getTime());
         // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-        if(confirm("You are about to delete history of the following hour (24-hour clock; yyyy/mm/dd/hh): \n\n" + timeSingle[0].substring(timeSingle [0].indexOf("/") + 1) + "\n\nClick OK to continue.")){
+        if(confirm("You are about to delete history of the following hour: \n\n\t" + printST + " " + abbr + "\n\nClick OK to continue.")){
           // console.log(timeSingle);
           chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
           $.datepicker._clearDate("#datepicker2");
@@ -322,16 +495,12 @@ $( function() {
 
   // Config by Time initialization
   function launchTime() {
-    // $.datepicker._clearDate("#datepicker2");  
-    $("#validateTips2").text("Select a time frame to delete history. ");
+    $("#timezone2").val("America/New_York");
+    $("#validateTips2").text("Select a time frame to delete history and the time zone you were in. ");
     $( "#datepicker2" ).datepicker({
           showOtherMonths: true,
           selectOtherMonths: true,
           minDate: -6, maxDate: 0
-          // beforeShowDay: function(date) {
-          //   var string = $.datepicker.formatDate('yy-mm-dd', date);
-          //   return [restrictedDates.indexOf(string) == -1];
-          // }
         }).blur(); 
     $('#singleTime').prop('disabled', false);
     $("#startTime").prop('disabled', false);
@@ -355,14 +524,14 @@ $( function() {
       $('#endTime').prop('disabled', true);
       $('#startTime').prop('disabled',true);
     });
-
+    $("#timezone2").select2();
   }
 
   // Dialog window config 
   dialog2 = $( "#deleteByTimeForm" ).dialog({
       autoOpen: false,
-      height: 267,
-      width: 359,
+      height: 280,
+      width: 330,
       modal: true,
       buttons: [
         {text: "Delete",
@@ -391,13 +560,8 @@ $( function() {
   // Initialize Help
   $("#btHelp").button().removeClass();
   $("#btHelp").button().on("click", function(){
-    alert("To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select a date within the past seven days \n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select a date and time frame within the past seven days\n\t\t3. Click \"Delete\" button\n\t\t4. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the website domain in \"Blacklist a website\"\n\t2. Press \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP, please visit https://csmapnyu.org/");
-  });
-
-// <--- Time Zone --->
-  $("#timezone").on("change", function() { 
-
-  });
+    alert("To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP, please visit https://csmapnyu.org/");
+  }); 
 
 });
 

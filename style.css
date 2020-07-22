@@ -32,22 +32,22 @@
   content: "";
   height: 14px;
   width: 14px;
-  left: 2px;
-  bottom: 2px;
+  left: 3px;
+  bottom: 3.5px;
   background: white;
   -webkit-transition: .4s;
   transition: .4s;
 }
 
-input:checked + .slider {
+#cbPause:checked + .slider {
   background-color: #57068c;
 }
 
-input:focus + .slider {
+#cbPause:focus + .slider {
   box-shadow: 0 0 1px #57068c;
 }
 
-input:checked + .slider:before {
+#cbPause:checked + .slider:before {
   -webkit-transform: translateX(20px);
   -ms-transform: translateX(20px);
   transform: translateX(20px);
@@ -62,7 +62,7 @@ input:checked + .slider:before {
 }
 
 /* style of popup window */
-.a, .b, .c, .d, .e, .f {
+.a, .b, .c, .d, .e, .f{
   position: relative;
   background-color: lavender ;
   opacity: 0.9;
@@ -80,7 +80,7 @@ input:checked + .slider:before {
   grid-template-columns: repeat(3, 1fr); /* or 2fr 1fr 2fr; -  three columns 1fr = 200px */
   grid-auto-rows:minmax(45px, auto);
   column-gap: 2px;
-  grip-gap: 1px;
+  grid-gap: 1px;
   row-gap: 2px;
 }
 
@@ -153,18 +153,46 @@ input:checked + .slider:before {
   border-width:1.5px;
 }
 
-.timezone {
-  width: 93px !important;
-}
-
 .validateTips { 
   border: 1px solid transparent !important;
+  margin-top: 6px;
+  margin-bottom:6px;
 } 
 
 #validateTips2{
-  margin-top: 5px !important;
-  margin-bottom: 5px !important
+  margin-top: 1px !important;
+  margin-bottom: 1px !important
 } 
+
+.ui-dialog {
+  padding:1px;
+}
+
+.ui-dialog-buttonpane {
+  margin:0px !important;
+  padding:0px!important;
+}
+
+.js-Selector {
+  width: 79%;
+}
+
+.select2-results .select2-results__options{
+  max-height:100px!important;
+  line-height:13px;
+}
+
+.select2-selection__rendered {
+  line-height: 25px !important;
+}
+
+.select2-selection {
+  height: 25px !important;
+}
+
+.select2-selection__arrow{
+  height:23px !important;
+}
 
 fieldset {
   border: 1px solid grey;
@@ -215,12 +243,12 @@ body {
   display: grid;
 }
 
-ul {
+.d ul {
   color: #008081;
   list-style-type: none;
 }
 
-li {
+.d li {
   margin-left: -30px;
   margin-top: -8px;
 }
