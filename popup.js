@@ -1,5 +1,5 @@
 
-// var console = chrome.extension.getBackgroundPage().console;
+var console = chrome.extension.getBackgroundPage().console;
 
 //console.log('Hello')
 var currID;
@@ -8,7 +8,6 @@ function setUserID() {
   var userInputID = "" + document.getElementById("userID").value;
   chrome.storage.sync.get('userID', function(temp) {
     currID = "" + temp.userID; 
-    // console.log(currID);
   });
 
   console.log(userInputID, currID)
@@ -32,7 +31,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     document.getElementById("btSubmit").disabled = true;
     document.getElementById("btAdd").disabled = true
     document.getElementById("cbPause").disabled = true
-    chrome.browserAction.setPopup({popup: ""});
+    // chrome.browserAction.setPopup({popup: ""});
     console.log('popup disabled')
   }
 });

@@ -1,5 +1,5 @@
 /* globals chrome, document */
-console.log('Welcome to Url historian');
+console.log('Welcome to URL Historian');
 
 //MESSAGES 
 valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP, please refer to the redirected page"
@@ -96,7 +96,7 @@ function createPath(msg) {
 
 // UPLOAD TO S3
 function upload(url, msg) {
-  if (userID !== "undefined" && userID !== "") {
+  // if (userID === "undefined") return; 
     date = new Date()
     var outpath = createPath(msg);
     var params= JSON.stringify({
@@ -112,7 +112,7 @@ function upload(url, msg) {
         if (err) return err;
         return 'uploaded successful'
        });
-  }
+  
 };
 
 // DELETE BY DATE OR TIME 
@@ -144,22 +144,25 @@ var attempt = 3;
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
     // SET USER ID
-    userID = request.userID;  
+    // userID = request.userID;  
 
     //VERIFY USER CREDENTIALS         
-    if (containsObject(userID, validate)) {
+    if (containsObject(request.userID, validate)) {
+        userID = request.userID
         chrome.tabs.create({url: "https://csmapnyu.org"});
       } else {
+        userID = 'undefined'
         attempt --
-        chrome.browserAction.setIcon({path: "icon_disabled.png"});
-        chrome.storage.sync.set({userID: 'Enter User ID'}, function(){});
         if(attempt > 0) {
+          chrome.browserAction.setIcon({path: "icon_disabled.png"});
+          chrome.storage.sync.set({userID: 'undefined'}, function(){});
           alert(msg_retry + '\nYou have ' + attempt + " attempt left");
           chrome.storage.sync.set({isPaused: true}, function(){});
         } else { 
           alert(msg_final);
-          // chrome.runtime.sendMessage({message: "validationFailure"});
-          chrome.browserAction.setPopup({popup: ""});
+          chrome.runtime.sendMessage({message: "validationFailure"});
+          
+          // chrome.browserAction.setPopup({popup: ""});
         }     
       }
   } else if (request.message == "resetPausedTime"){
@@ -224,7 +227,9 @@ chrome.runtime.onInstalled.addListener(function(details) {
       loadConfig(xhr)
     
       chrome.storage.sync.get('userID', function(temp) {
-       userID = "" + temp.userID });
+       userID = "" + temp.userID 
+       console.log(userID)});
+       
 
       // check  status
       chrome.storage.sync.get(['isPaused'], function(temp) {
@@ -238,59 +243,17 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
   // LISTEN TO TAB CHANGES 
   chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    // don't do anything if url hasn't changed    
-    var myURL = "" + tab.url;
-    if (!changeInfo.url) return;
-    chrome.storage.sync.get(['isPaused'], function(temp){
-      pause = temp.isPaused;
-      if (!pause) {
-        chrome.storage.sync.get({blacklist: []}, function(temp2) {
-          var bl = temp2.blacklist;
-          //console.log(bl)
-          var m = 0;
-          for (var i = 0; i < bl.length; i++){
-            var t = "" + bl[i];
-            if (myURL.includes(t)){
-              m++;
-            }
-          }
-          // BLACKLIST HEALTH, FINANCIAL, EMPLOYEE,TAX  
-          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
-          // UNCOMMENT BELOW TO BLACKLIST SITES THAT WILL HAVE THE TERMS IN THE URL
-            // || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
-            // || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
-            // || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
-            // || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("mail")
-            // || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
-            // || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
-            // || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
-            // || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") 
-            // || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") 
-            // || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
-            // || tab.url.toLowerCase().includes("tax")) return;
-          if (m === 0 ){
-           upload(changeInfo.url,'new');
-          } else {
-            upload("blacklist", "blacklisted")
-            return;
-          }
-        });
-      } else if(pause) {
-        upload("paused", "pause")
-      }
-    });
-  });
-
-  // LISTEN TO ACTIVATION 
-  chrome.tabs.onActivated.addListener(function(activeInfo) {
-    chrome.tabs.get(activeInfo.tabId, function(tab) {
+    // ENSURE USER HAS USED A VALID ID   
+    if (userID !== undefined && userID !== 'undefined') { 
       var myURL = "" + tab.url;
-       if (!tab.url || !tab.url.includes("chrome://")) return;
+      // DO NOTHING IF URL HASNT CHANGED
+      if (!changeInfo.url) return;
       chrome.storage.sync.get(['isPaused'], function(temp){
         pause = temp.isPaused;
         if (!pause) {
           chrome.storage.sync.get({blacklist: []}, function(temp2) {
             var bl = temp2.blacklist;
+            //console.log(bl)
             var m = 0;
             for (var i = 0; i < bl.length; i++){
               var t = "" + bl[i];
@@ -298,22 +261,37 @@ chrome.runtime.onInstalled.addListener(function(details) {
                 m++;
               }
             }
+            // BLACKLIST HEALTH, FINANCIAL, EMPLOYEE,TAX  
             if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
-            if (m === 0 ) {
-              upload(tab.url, "new");
+            // UNCOMMENT BELOW TO BLACKLIST SITES THAT WILL HAVE THE TERMS IN THE URL
+              // || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
+              // || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
+              // || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
+              // || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("mail")
+              // || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
+              // || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
+              // || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
+              // || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") 
+              // || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") 
+              // || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
+              // || tab.url.toLowerCase().includes("tax")) return;
+            if (m === 0 ){
+             upload(changeInfo.url,'new');
             } else {
-              console.log("Blacklisted");
-              upload("blacklist","blacklisted")
+              upload("__BLACKLIST__", "blacklisted")
               return;
             }
           });
-        };
+        } else if(pause) {
+          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
+          upload("__PAUSED__", "pause")
+        }
       });
-    });
+    }
   });
-//});
+
 chrome.alarms.onAlarm.addListener(function(alarm) {
-  alert("Url Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open Url Historian, and slide toggle button to the right.)\n\nThank you for contributing to our research!");
+  alert("Url Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!");
   pausedMins += 30;
 });
 
