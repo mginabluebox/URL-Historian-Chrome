@@ -61,6 +61,9 @@
   border-radius: 50%;
 }
 
+#cbPause:disabled + .slider {
+  cursor:not-allowed;
+}
 /* style of popup window */
 .a, .b, .c, .d, .e, .f{
   position: relative;
@@ -213,7 +216,7 @@ button {
   border-radius: 6px;
 }
 
-button:hover{
+button:hover {
   background-color: #BF94E4;
 }
 
@@ -237,6 +240,16 @@ body {
   opacity: 0.9;
   text-overflow: ellipsis;
   color: #323439;
+}
+
+input:disabled {
+  background-color: grey;
+  cursor:not-allowed;
+}
+
+button:disabled, button:disabled:hover {
+  cursor:not-allowed;
+  background-color:grey;
 }
 
 #container {

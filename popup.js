@@ -3,39 +3,40 @@ var console = chrome.extension.getBackgroundPage().console;
 
 //console.log('Hello')
 var currID;
-function setUserID() {
-  var msg = "Welcome to Url Historian. Please enter your User ID!"
+var attempt = 10; 
+async function setUserID() {
+  var msg = "Welcome to URL Historian. Please enter your User ID!"
   var userInputID = "" + document.getElementById("userID").value;
   chrome.storage.sync.get('userID', function(temp) {
     currID = "" + temp.userID; 
   });
 
-  console.log(userInputID, currID)
+  console.log(userInputID, currID);
   if (userInputID === '') { 
     alert(msg);
-  } else if(!(userInputID == currID)) {
-    chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"}); 
-  } else {
+  } else if(!(userInputID === currID)) {
     chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
+    }
   }
+  // } else {
+  //   chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
+  // }
 
-};
-
-
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.message == "validationFailure") {
-  //  To do something
-    // chrome.browserAction.setIcon({path: "icon_disabled.png"});
-    document.getElementById("userID").disabled = true
-    document.getElementById("userInput").disabled = true;
-    document.getElementById("btSubmit").disabled = true;
-    document.getElementById("btAdd").disabled = true
-    document.getElementById("cbPause").disabled = true
-    // chrome.browserAction.setPopup({popup: ""});
-    console.log('popup disabled')
-  }
-});
-
+// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+//   console.log("getting request");
+//   if (request.message == "validationFailure") {
+//   //  To do something
+//     console.log("got request");
+//     // chrome.browserAction.setIcon({path: "icon_disabled.png"});
+//     document.getElementById("userID").disabled = true
+//     document.getElementById("userInput").disabled = true;
+//     document.getElementById("btSubmit").disabled = true;
+//     document.getElementById("btAdd").disabled = true
+//     document.getElementById("cbPause").disabled = true
+//     // chrome.browserAction.setPopup({popup: ""});
+//     console.log('popup disabled')
+//   }
+// });
 
 //remove items from blacklist 
 var remove = document.getElementsByClassName("remove");
@@ -171,7 +172,7 @@ function pauseExtension(){
     // console.log(temp.userID + " " + temp.isPaused);
     if (temp.userID === undefined) {
       document.getElementById("cbPause").checked = false;
-      alert("Welcome to Url Historian. Please log in with your User ID!");
+      alert("Welcome to URL Historian. Please log in with your User ID!");
     } else {
       var paused = !temp.isPaused;
       chrome.storage.sync.set({isPaused: paused});
@@ -191,6 +192,20 @@ function pauseExtension(){
     }
   });
 }
+  // Get value from chrome.storage using key
+  // Asynchronous. Used in async functions and with 'await' keyword
+  async function getSyncStorageValue(key) {
+    return new Promise((resolve, reject) => {
+      try {
+        chrome.storage.sync.get(key, function(temp){ 
+          resolve(temp);
+        });
+      }
+      catch (ex) {
+        reject(ex);
+      }
+    });
+  }
 
 // Request Data Deletion
 $( function() {
@@ -242,21 +257,6 @@ $( function() {
       // console.log(timeRange);
       return timeRange;
     }
-  }
-
-  // Get value from chrome.storage using key
-  // Asynchronous. Used in async functions and with 'await' keyword
-  async function getSyncStorageValue(key) {
-    return new Promise((resolve, reject) => {
-      try {
-        chrome.storage.sync.get(key, function(temp){ 
-          resolve(temp);
-        });
-      }
-      catch (ex) {
-        reject(ex);
-      }
-    });
   }
 
 // <--- Time Zone --->
@@ -563,6 +563,24 @@ $( function() {
   }); 
 
 });
+
+// Disalbe extension after three attempts
+getSyncStorageValue("isDeactivated").then(function(isDeactivated) {
+  // console.log("what is isDeactivated: ", isDeactivated);
+if (isDeactivated.isDeactivated !== undefined) {
+  isDeactivated = isDeactivated.isDeactivated;
+  // console.log("isDeactivated:", isDeactivated);
+  if (isDeactivated === true) {
+    document.getElementById("userID").disabled = true;
+    document.getElementById("btSubmit").disabled = true;
+    document.getElementById("btAdd").disabled = true;
+    document.getElementById("cbPause").disabled = true;
+    document.getElementById("btDeleteDate").disabled = true;
+    document.getElementById("btDeleteTime").disabled = true;
+    document.getElementById("userInput").disabled = true;
+  }
+}
+})
 
 
 //link buttons to appropriate functions once website is loaded

@@ -16,7 +16,24 @@ var date;
 var validate;
 var pausedMins = 60;
 
-function containsObject(obj, list) {
+// function containsObject(obj, list) {
+//     var i;
+//     for (i = 0; i < list.length; i++) {
+//         if (list[i] === obj) {
+//             console.log[i]
+//             chrome.storage.sync.set({userID: obj}, function(){});
+//             chrome.storage.sync.set({isPaused: false}, function(){});
+//             chrome.browserAction.setIcon({path: "icon128.png"});
+//             alert(valid_msg);
+//             return true;
+//         }
+//     }
+//     return false;
+// };
+
+// new version to handle async
+function containsObjectNew(obj, list) {
+  return new Promise(function(resolve) {
     var i;
     for (i = 0; i < list.length; i++) {
         if (list[i] === obj) {
@@ -25,11 +42,12 @@ function containsObject(obj, list) {
             chrome.storage.sync.set({isPaused: false}, function(){});
             chrome.browserAction.setIcon({path: "icon128.png"});
             alert(valid_msg);
-            return true;
-        }
+            resolve(true);
+        } 
     }
-    return false;
-};
+    resolve(false);
+  });
+}
 
 // SET CONFIGURATION PARAMETERS
 function loadConfig(xhr) {
@@ -145,26 +163,49 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
     // SET USER ID
     // userID = request.userID;  
-
-    //VERIFY USER CREDENTIALS         
-    if (containsObject(request.userID, validate)) {
+    //VERIFY USER CREDENTIALS    
+    containsObjectNew(request.userID, validate).then(function(value) {
+      if (value === true) {
         userID = request.userID
         chrome.tabs.create({url: "https://csmapnyu.org"});
+        chrome.storage.sync.set({isDeactivated:false});
       } else {
-        userID = 'undefined'
-        attempt --
+        userID = 'undefined';
+        attempt --;
         if(attempt > 0) {
-          chrome.browserAction.setIcon({path: "icon_disabled.png"});
-          chrome.storage.sync.set({userID: 'undefined'}, function(){});
-          alert(msg_retry + '\nYou have ' + attempt + " attempt left");
-          chrome.storage.sync.set({isPaused: true}, function(){});
+          // chrome.browserAction.setIcon({path: "icon_disabled.png"});
+          // chrome.storage.sync.set({userID: 'undefined'}, function(){});
+          alert(msg_retry + '\nYou have ' + attempt + " attempt left.");
+          // chrome.storage.sync.set({isPaused: true}, function(){});
         } else { 
           alert(msg_final);
-          chrome.runtime.sendMessage({message: "validationFailure"});
+          chrome.storage.sync.set({isDeactivated:true});
+          // chrome.runtime.sendMessage({message: "validationFailure"});
           
           // chrome.browserAction.setPopup({popup: ""});
         }     
       }
+    });
+    // if (containsObject(request.userID, validate)) {
+    //     userID = request.userID
+    //     chrome.tabs.create({url: "https://csmapnyu.org"});
+    //   } else {
+    //     userID = 'undefined';
+    //     attempt --;
+    //     if(attempt > 0) {
+    //       // chrome.browserAction.setIcon({path: "icon_disabled.png"});
+    //       // chrome.storage.sync.set({userID: 'undefined'}, function(){});
+    //       alert(msg_retry + '\nYou have ' + attempt + " attempt left.");
+    //       // chrome.storage.sync.set({isPaused: true}, function(){});
+    //     } else { 
+    //       alert(msg_final);
+    //       sendResponse({message:'validationFailure'});
+    //       return true;
+    //       // chrome.runtime.sendMessage({message: "validationFailure"});
+          
+    //       // chrome.browserAction.setPopup({popup: ""});
+    //     }     
+    //   }
   } else if (request.message == "resetPausedTime"){
       pausedMins = 60;
   } else {
@@ -182,7 +223,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         deleteObjects(prefix[i])
       }
     }
-  }  
+  }
 });
 
 chrome.runtime.onStartup.addListener(function () {
