@@ -228,35 +228,40 @@ $( function() {
     var startTime;
     var endTime; 
     var day = date.toISOString().slice(0, 10);
-
-    if (starttime !== '' && endtime == '') {
+    currID = currID.toString();
+    if (starttime !== '' && endtime == '') { // by single hour
       starttime = (starttime<10) ? " 0"+starttime+":00" : " "+starttime+":00";
-      startTime = moment.tz(day+starttime, timezone).utc();
+      startTime = moment.tz(day+starttime, timezone).valueOf();
       // console.log([[currID, startTime.format("YYYY/MM/DD/HH")].join('/')]);
-      return [[currID, startTime.format("YYYY/MM/DD/HH")].join('/')];
-    } else {
-
-      if (starttime == '' && endtime == '') {
+      return [currID, startTime, startTime + (60*60*1000)];
+    } else if (starttime == '' && endtime == '') { // by date
         starttime = ' 00:00';
-        endtime = ' 23:00';
-      } else {
-        starttime = (starttime<10) ? " 0"+starttime+":00" : " "+starttime+":00";
-        endtime = (endtime<10) ? " 0"+endtime+":00" : " "+endtime+":00";
-      }
+        startTime = moment.tz(day+starttime, timezone).valueOf();
+        // console.log([currID, startTime, startTime + (24*60*60)]);
+        return [currID, startTime, startTime + (24*60*60*1000)];
+    } else { // by time range
+      starttime = (starttime<10) ? " 0"+starttime+":00" : " "+starttime+":00";
+      endtime = (endtime<10) ? " 0"+endtime+":00" : " "+endtime+":00";
 
-      //CONVERT TO UTC
-      startTime = moment.tz(day+starttime, timezone).utc();
-      endTime = moment.tz(day+endtime, timezone).utc();
+      startTime = moment.tz(day+starttime, timezone).valueOf();
+      endTime = moment.tz(day+endtime, timezone).valueOf();
 
-      var timeRange = [[currID,startTime.format("YYYY/MM/DD/HH")].join("/")];
-      var time = startTime.clone();
-      while (!time.isSame(endTime)) {
-        time.add(1,"hour");
-        timeRange.push([currID,time.format("YYYY/MM/DD/HH")].join("/"));
-      }
-      // console.log(timeRange);
-      return timeRange;
+      // console.log([currID, startTime, endTime+(60*60)]);
+      return [currID, startTime, endTime+(60*60*1000)];
     }
+
+      // //CONVERT TO UTC
+      // startTime = moment.tz(day+starttime, timezone).utc();
+      // endTime = moment.tz(day+endtime, timezone).utc();
+
+      // var timeRange = [[currID,startTime.format("YYYY/MM/DD/HH")].join("/")];
+      // var time = startTime.clone();
+      // while (!time.isSame(endTime)) {
+      //   time.add(1,"hour");
+      //   timeRange.push([currID,time.format("YYYY/MM/DD/HH")].join("/"));
+      // }
+      // // console.log(timeRange);
+      // return timeRange;
   }
 
 // <--- Time Zone --->
@@ -400,7 +405,8 @@ $( function() {
       // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
       if(confirm("You are about to delete all history on:\n\n\t" + printDate+ " " + abbr + "\n\nClick OK to continue.")){
         // console.log(formattedDate[0]);
-        chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
+        // chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
+        chrome.runtime.sendMessage({prefix: formattedDate, message:'delete'});
         $.datepicker._clearDate("#datepicker1");
         $(this).dialog( "close" );
       }
@@ -458,7 +464,7 @@ $( function() {
     else if (date !== null && timezone !== '') {
       // DELETE BY HOUR RANGE
       if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
-        var timeRange = formatDateTime(currID, date, timezone, starttime=startTime, endtime=endTime);
+        var formattedTime = formatDateTime(currID, date, timezone, starttime=startTime, endtime=endTime);
         
         var printST = formatPrintDateTime(date, startTime);
         var printET = formatPrintDateTime(date, endTime);
@@ -467,7 +473,8 @@ $( function() {
         // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
         if(confirm("You are about to delete history in the following time frame (inclusive):\n\n\tfrom: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nClick OK to continue.")){
           // console.log(timeRange);
-          chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
+          //chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
+          chrome.runtime.sendMessage({prefix: formattedTime, message:'delete'});
           $.datepicker._clearDate("#datepicker2");
           dialog2.dialog( "close" );
         }
@@ -480,7 +487,8 @@ $( function() {
         // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
         if(confirm("You are about to delete history of the following hour: \n\n\t" + printST + " " + abbr + "\n\nClick OK to continue.")){
           // console.log(timeSingle);
-          chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
+          // chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
+          chrome.runtime.sendMessage({prefix: timeSingle, message:'delete'});
           $.datepicker._clearDate("#datepicker2");
           dialog2.dialog( "close" );
         }
