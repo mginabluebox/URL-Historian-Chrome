@@ -14,9 +14,10 @@ When the icon appears grey ![icon](icon_disabled_16.png), all activities in the 
 ### Login 
 1. Enter your user ID in *User ID*.
 2. Click on **Submit**. The extension will become active ![icon](icon16.png).
+3. After 3 failed login attempts, you will be denied access to the extension's functionalities. You can contact our research team to recover your user ID and access to the extension. 
 
 ### Pause/Activate the extension 
-*   Slide the toggle button to the left to pause ![icon](icon_disabled_16.png), or right to reactivate the extension ![icon](icon16.png).
+* Slide the toggle button to the left to pause ![icon](icon_disabled_16.png), or right to reactivate the extension ![icon](icon16.png).
 
 ### Blacklist websites
 * Set up a list of domains that you prefer to keep private.
