@@ -60,17 +60,24 @@ function loadConfig(xhr) {
   AWS.config.region = config.bucketRegion; 
   AWS.config.credentials = new AWS.CognitoIdentityCredentials({
           IdentityPoolId: config.poolId });
-  resource = new AWS.S3({
+  resource = new AWS.DynamoDB({
+    apiVersion: '2012-08-10'
+  });
+  // resource = new AWS.S3({
+  //       apiVersion: "2006-03-01",
+  //       params: {Bucket: config.bucketName,}
+  //     });
+  s3 = new AWS.S3({
         apiVersion: "2006-03-01",
         params: {Bucket: config.bucketName,}
       });
-  resource.getObject({ Key: config.idPath}, function(err, data) {
+  s3.getObject({ Key: config.idPath}, function(err, data) {
         if(err) return err;
         getObject(data);
   });
 }
 
-// LOAD FILE 
+// LOAD CONFIG FILE 
 var xhr = new XMLHttpRequest();
 xhr.open("GET", chrome.extension.getURL("/.config.json"), true);
 xhr.onreadystatechange = function() {
@@ -85,77 +92,179 @@ xhr.onreadystatechange = function() {
 };
 xhr.send();
 
-// CREATE OUTPUT PATH
-function createPath(msg) {
+// // CREATE OUTPUT PATH
+// function createPath(msg) {
 
-  function pad(val) {
-    return (val<10) ? '0' + val : val;
-  }
+//   function pad(val) {
+//     return (val<10) ? '0' + val : val;
+//   }
 
-  // SET LOCAL ACCESS TIME IN UTC
-  var year = date.getUTCFullYear();
-  var month = pad(date.getUTCMonth() + 1);
-  var day = date.getUTCDate();
-  var hour = pad(date.getUTCHours());
-  var minute = pad(date.getUTCMinutes());
-  var seconds = pad(date.getUTCSeconds());
+//   // SET LOCAL ACCESS TIME IN UTC
+//   var year = date.getUTCFullYear();
+//   var month = pad(date.getUTCMonth() + 1);
+//   var day = date.getUTCDate();
+//   var hour = pad(date.getUTCHours());
+//   var minute = pad(date.getUTCMinutes());
+//   var seconds = pad(date.getUTCSeconds());
 
-  // // create object key
-  filepath = [userID, year, month, day, hour, ''].join('/') + [userID, year, month, day, hour, minute, seconds].join('_')
+//   // // create object key
+//   filepath = [userID, year, month, day, hour, ''].join('/') + [userID, year, month, day, hour, minute, seconds].join('_')
 
-  if (msg ==='pause') {
-    return  filepath + '_paused.json';
-  } else if(msg === 'new') {
-      return filepath + '.json' 
-  } else if (msg === 'blacklisted') {
-     return  filepath + '_' + msg + '.json'
-  }
-};
+//   if (msg ==='pause') {
+//     return  filepath + '_paused.json';
+//   } else if(msg === 'new') {
+//       return filepath + '.json' 
+//   } else if (msg === 'blacklisted') {
+//      return  filepath + '_' + msg + '.json'
+//   }
+// };
 
-// UPLOAD TO S3
-function upload(url, msg) {
-  // if (userID === "undefined") return; 
-    date = new Date()
-    var outpath = createPath(msg);
-    var params= JSON.stringify({
-    ID: userID,
-    visited_url: url,
-    timestamp: date.getTime() // UTC
-    });
-    console.log(outpath, params)
-    resource.upload({
-       Key: outpath,
-       Body: params
-       }, function(err, data) {
-        if (err) return err;
-        return 'uploaded successful'
-       });
+// // UPLOAD TO S3
+// function upload(url, msg) {
+//   // if (userID === "undefined") return; 
+//     date = new Date()
+//     var outpath = createPath(msg);
+//     var params= JSON.stringify({
+//     ID: userID,
+//     visited_url: url,
+//     timestamp: date.getTime() // UTC
+//     });
+//     console.log(outpath, params)
+//     resource.upload({
+//        Key: outpath,
+//        Body: params
+//        }, function(err, data) {
+//         if (err) return err;
+//         return 'uploaded successful'
+//        });
   
-};
+// };
 
-// DELETE BY DATE OR TIME 
-async function deleteObjects(prefix) {
+// UPLOAD TO DynamoDB
+function upload(url) {
+  date = new Date();
   var params = {
-    Prefix: prefix
+    TableName: 'web_browsing', 
+    Item: {
+      "user_id": {'S': userID},
+      "visited_url": {'S': url},
+      "visit_timestamp": {'N': date.getTime().toString()}
     }
-  await resource.listObjects(params, function(err, data) {
-    if (err) return err;
-    if (data.Contents.length ==0) return;
-    var deleteParams = {
-      Delete: {Objects: []}
-      };
+  };
+  console.log(params); // for demo
+  resource.putItem(params, function(err, data) {
+    // if(err) {console.log("Error: ", err);}
+    // else console.log("Successfully created item: ", data); // for debug
+    if (err) console.log(err);
+    else return 'Successfully created item'; // for release
+  })
+}
 
-    data.Contents.forEach(({Key}) => {
-      deleteParams.Delete.Objects.push({ Key });
-    });
-    console.log(deleteParams.Delete.Objects)
-    resource.deleteObjects(deleteParams, function(err, data) {
-      if (err) return err;
-      if(data.IsTruncated) deleteObjects(path);
-      else return;
-    });
+// // S3 DELETE BY DATE OR TIME 
+// async function deleteObjects(prefix) {
+//   var params = {
+//     Prefix: prefix
+//     }
+//   await resource.listObjects(params, function(err, data) {
+//     if (err) return err;
+//     if (data.Contents.length == 0) return;
+//     var deleteParams = {
+//       Delete: {Objects: []}
+//       };
+
+//     data.Contents.forEach(({Key}) => {
+//       deleteParams.Delete.Objects.push({ Key });
+//     });
+//     console.log(deleteParams.Delete.Objects)
+//     resource.deleteObjects(deleteParams, function(err, data) {
+//       if (err) return err;
+//       if(data.IsTruncated) deleteObjects(path);
+//       else return;
+//     });
+//   });
+// };
+
+// DynamoDB DELETE BY DATE OR BY TIME
+function deleteObjects(prefix) {
+
+  prefix[1] = prefix[1].toString();
+  prefix[2] = prefix[2].toString();
+  // console.log("starttime is ", prefix[1], 'endtime is ', prefix[2]);
+
+  // SLICE ARRAY INTO BATCHES
+  function chunkArray(myArray, chunk_size){
+    var index = 0;
+    var arrayLength = myArray.length;
+    var tempArray = [];
+    
+    for (index = 0; index < arrayLength; index += chunk_size) {
+        myChunk = myArray.slice(index, index+chunk_size);
+        tempArray.push(myChunk);
+    }
+
+    return tempArray;
+  }
+
+  // QUERY PARAMETERS
+  var qparam = {
+    TableName: "web_browsing",
+    KeyConditionExpression: "#ui = :ui AND (#vt BETWEEN :st AND :et)",
+    ExpressionAttributeNames: {
+      '#vt' : 'visit_timestamp',
+      '#ui' : 'user_id'
+    },
+    ExpressionAttributeValues: {
+      ':st' : {'N': prefix[1]},
+      ':et' : {'N': prefix[2]},
+      ':ui' : {'S': prefix[0]}
+    }
+  }
+
+  var paramList = [];
+  resource.query(qparam, function(err,data) {
+    if (err) {console.log(err);}
+    else {
+      var items = data.Items;
+      // QUERY RECORDS
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        // console.log('user_id: ', item.user_id.S, 'timestamp: ', item.visit_timestamp.N, 'url: ',item.visited_url.S);
+        var param = {
+          DeleteRequest: {
+            Key: {
+              "user_id": {'S' : item.user_id.S},
+              'visit_timestamp' : {'N' : item.visit_timestamp.N}
+            }
+          }
+        }
+        paramList.push(param);
+      }
+
+      // SLICE RECORDS INTO BATCHES OF 25 
+      var batchParams = chunkArray(paramList, 25);
+
+      // DELETE RECORDS IF RECORD EXISTS
+      if (batchParams.length !== 0) {
+        for (var i = 0; i < batchParams.length; i++) {
+          var dparam = {
+            RequestItems: {
+              "web_browsing" : batchParams[i]
+            }
+            // ReturnConsumedCapacity: "INDEXES" // for demo
+
+          }
+          // console.log(dparam);
+          resource.batchWriteItem(dparam, function(err,data) {
+            // if(err) console.log(err);
+            // else console.log(data); // for demo and debug
+            if (err) console.log(err);
+            else return 'Records deleted'; // for release
+          });
+        } 
+      } 
+    }
   });
-};
+}
 
 var attempt = 3; 
 // RECEIVE MESSAGE FROM POPUP ON USER INPUT
@@ -208,22 +317,24 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //   }
   } else if (request.message == "resetPausedTime"){
       pausedMins = 60;
-  } else {
-    var prefix;
-    if(request.message == "delbyTime" ) {
-      prefix = request.delbyTime
-    } else if (request.message == "delbyDate" ) {
-      prefix = request.delbyDate
-    }
-    // console.log(prefix.length);
-    if (prefix.length ==1) {
-        deleteObjects(prefix[0]);
-    } else if(prefix.length > 1) {
-      for (i=0; i < prefix.length; i++) {
-        deleteObjects(prefix[i])
-      }
-    }
+  // } else {
+  } else if (request.message = 'delete') {
+      deleteObjects(request.prefix);
   }
+    // var prefix;
+    // if(request.message == "delbyTime" ) {
+    //   prefix = request.delbyTime
+    // } else if (request.message == "delbyDate" ) {
+    //   prefix = request.delbyDate
+    // }
+    // // console.log(prefix.length);
+    // if (prefix.length ==1) {
+    //     deleteObjects(prefix[0]);
+    // } else if(prefix.length > 1) {
+    //   for (i=0; i < prefix.length; i++) {
+    //     deleteObjects(prefix[i])
+    //   }
+    // }
 });
 
 chrome.runtime.onStartup.addListener(function () {
@@ -317,22 +428,25 @@ chrome.runtime.onInstalled.addListener(function(details) {
               // || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
               // || tab.url.toLowerCase().includes("tax")) return;
             if (m === 0 ){
-             upload(changeInfo.url,'new');
+             // upload(changeInfo.url,"new");
+             upload(changeInfo.url);
             } else {
-              upload("__BLACKLIST__", "blacklisted")
+              // upload("__BLACKLIST__", "blacklisted")
+              upload("__BLACKLIST__");
               return;
             }
           });
         } else if(pause) {
           if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
-          upload("__PAUSED__", "pause")
+          // upload("__PAUSED__", "pause")
+          upload("__PAUSED__");
         }
       });
     }
   });
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
-  alert("Url Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!");
+  alert("URL Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!");
   pausedMins += 30;
 });
 
