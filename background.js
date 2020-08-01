@@ -16,22 +16,6 @@ var date;
 var validate;
 var pausedMins = 60;
 
-// function containsObject(obj, list) {
-//     var i;
-//     for (i = 0; i < list.length; i++) {
-//         if (list[i] === obj) {
-//             console.log[i]
-//             chrome.storage.sync.set({userID: obj}, function(){});
-//             chrome.storage.sync.set({isPaused: false}, function(){});
-//             chrome.browserAction.setIcon({path: "icon128.png"});
-//             alert(valid_msg);
-//             return true;
-//         }
-//     }
-//     return false;
-// };
-
-// new version to handle async
 function containsObjectNew(obj, list) {
   return new Promise(function(resolve) {
     var i;
@@ -63,10 +47,7 @@ function loadConfig(xhr) {
   resource = new AWS.DynamoDB({
     apiVersion: '2012-08-10'
   });
-  // resource = new AWS.S3({
-  //       apiVersion: "2006-03-01",
-  //       params: {Bucket: config.bucketName,}
-  //     });
+
   s3 = new AWS.S3({
         apiVersion: "2006-03-01",
         params: {Bucket: config.bucketName,}
@@ -92,54 +73,6 @@ xhr.onreadystatechange = function() {
 };
 xhr.send();
 
-// // CREATE OUTPUT PATH
-// function createPath(msg) {
-
-//   function pad(val) {
-//     return (val<10) ? '0' + val : val;
-//   }
-
-//   // SET LOCAL ACCESS TIME IN UTC
-//   var year = date.getUTCFullYear();
-//   var month = pad(date.getUTCMonth() + 1);
-//   var day = date.getUTCDate();
-//   var hour = pad(date.getUTCHours());
-//   var minute = pad(date.getUTCMinutes());
-//   var seconds = pad(date.getUTCSeconds());
-
-//   // // create object key
-//   filepath = [userID, year, month, day, hour, ''].join('/') + [userID, year, month, day, hour, minute, seconds].join('_')
-
-//   if (msg ==='pause') {
-//     return  filepath + '_paused.json';
-//   } else if(msg === 'new') {
-//       return filepath + '.json' 
-//   } else if (msg === 'blacklisted') {
-//      return  filepath + '_' + msg + '.json'
-//   }
-// };
-
-// // UPLOAD TO S3
-// function upload(url, msg) {
-//   // if (userID === "undefined") return; 
-//     date = new Date()
-//     var outpath = createPath(msg);
-//     var params= JSON.stringify({
-//     ID: userID,
-//     visited_url: url,
-//     timestamp: date.getTime() // UTC
-//     });
-//     console.log(outpath, params)
-//     resource.upload({
-//        Key: outpath,
-//        Body: params
-//        }, function(err, data) {
-//         if (err) return err;
-//         return 'uploaded successful'
-//        });
-  
-// };
-
 // UPLOAD TO DynamoDB
 function upload(url) {
   date = new Date();
@@ -153,36 +86,12 @@ function upload(url) {
   };
   console.log(params); // for demo
   resource.putItem(params, function(err, data) {
-    // if(err) {console.log("Error: ", err);}
-    // else console.log("Successfully created item: ", data); // for debug
-    if (err) console.log(err);
-    else return 'Successfully created item'; // for release
+    if(err) {console.log("Error: ", err);}
+    else console.log("Successfully created item: ", data); // for debug
+    // if (err) console.log(err);
+    // else return 'Successfully created item'; // for release
   })
 }
-
-// // S3 DELETE BY DATE OR TIME 
-// async function deleteObjects(prefix) {
-//   var params = {
-//     Prefix: prefix
-//     }
-//   await resource.listObjects(params, function(err, data) {
-//     if (err) return err;
-//     if (data.Contents.length == 0) return;
-//     var deleteParams = {
-//       Delete: {Objects: []}
-//       };
-
-//     data.Contents.forEach(({Key}) => {
-//       deleteParams.Delete.Objects.push({ Key });
-//     });
-//     console.log(deleteParams.Delete.Objects)
-//     resource.deleteObjects(deleteParams, function(err, data) {
-//       if (err) return err;
-//       if(data.IsTruncated) deleteObjects(path);
-//       else return;
-//     });
-//   });
-// };
 
 // DynamoDB DELETE BY DATE OR BY TIME
 function deleteObjects(prefix) {
@@ -249,16 +158,16 @@ function deleteObjects(prefix) {
           var dparam = {
             RequestItems: {
               "web_browsing" : batchParams[i]
-            }
-            // ReturnConsumedCapacity: "INDEXES" // for demo
+            },
+            ReturnConsumedCapacity: "INDEXES" // for demo
 
           }
           // console.log(dparam);
           resource.batchWriteItem(dparam, function(err,data) {
-            // if(err) console.log(err);
-            // else console.log(data); // for demo and debug
-            if (err) console.log(err);
-            else return 'Records deleted'; // for release
+            if(err) console.log(err);
+            else console.log(data); // for demo and debug
+            // if (err) console.log(err);
+            // else return 'Records deleted'; // for release
           });
         } 
       } 
@@ -295,46 +204,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         }     
       }
     });
-    // if (containsObject(request.userID, validate)) {
-    //     userID = request.userID
-    //     chrome.tabs.create({url: "https://csmapnyu.org"});
-    //   } else {
-    //     userID = 'undefined';
-    //     attempt --;
-    //     if(attempt > 0) {
-    //       // chrome.browserAction.setIcon({path: "icon_disabled.png"});
-    //       // chrome.storage.sync.set({userID: 'undefined'}, function(){});
-    //       alert(msg_retry + '\nYou have ' + attempt + " attempt left.");
-    //       // chrome.storage.sync.set({isPaused: true}, function(){});
-    //     } else { 
-    //       alert(msg_final);
-    //       sendResponse({message:'validationFailure'});
-    //       return true;
-    //       // chrome.runtime.sendMessage({message: "validationFailure"});
-          
-    //       // chrome.browserAction.setPopup({popup: ""});
-    //     }     
-    //   }
   } else if (request.message == "resetPausedTime"){
       pausedMins = 60;
   // } else {
   } else if (request.message = 'delete') {
       deleteObjects(request.prefix);
   }
-    // var prefix;
-    // if(request.message == "delbyTime" ) {
-    //   prefix = request.delbyTime
-    // } else if (request.message == "delbyDate" ) {
-    //   prefix = request.delbyDate
-    // }
-    // // console.log(prefix.length);
-    // if (prefix.length ==1) {
-    //     deleteObjects(prefix[0]);
-    // } else if(prefix.length > 1) {
-    //   for (i=0; i < prefix.length; i++) {
-    //     deleteObjects(prefix[i])
-    //   }
-    // }
 });
 
 chrome.runtime.onStartup.addListener(function () {
@@ -449,7 +324,5 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
   alert("URL Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!");
   pausedMins += 30;
 });
-
-
 
 //});
