@@ -1,5 +1,5 @@
 
-var console = chrome.extension.getBackgroundPage().console;
+// var console = chrome.extension.getBackgroundPage().console;
 
 //console.log('Hello')
 var currID;
@@ -11,32 +11,13 @@ async function setUserID() {
     currID = "" + temp.userID; 
   });
 
-  console.log(userInputID, currID);
+  // console.log(userInputID, currID);
   if (userInputID === '') { 
     alert(msg);
   } else if(!(userInputID === currID)) {
     chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
     }
   }
-  // } else {
-  //   chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
-  // }
-
-// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-//   console.log("getting request");
-//   if (request.message == "validationFailure") {
-//   //  To do something
-//     console.log("got request");
-//     // chrome.browserAction.setIcon({path: "icon_disabled.png"});
-//     document.getElementById("userID").disabled = true
-//     document.getElementById("userInput").disabled = true;
-//     document.getElementById("btSubmit").disabled = true;
-//     document.getElementById("btAdd").disabled = true
-//     document.getElementById("cbPause").disabled = true
-//     // chrome.browserAction.setPopup({popup: ""});
-//     console.log('popup disabled')
-//   }
-// });
 
 //remove items from blacklist 
 var remove = document.getElementsByClassName("remove");
@@ -156,7 +137,6 @@ function writeList(){
 var alarmOnPause = {
 
         onHandler : function(e) {
-            // chrome.alarms.create("alarmUser", {delayInMinutes: 0.1, periodInMinutes: 0.1} ); // for testing
             chrome.alarms.create("alarmUser", {delayInMinutes: 60, periodInMinutes: 30} );
         },
 
@@ -249,19 +229,6 @@ $( function() {
       // console.log([currID, startTime, endTime+(60*60)]);
       return [currID, startTime, endTime+(60*60*1000)];
     }
-
-      // //CONVERT TO UTC
-      // startTime = moment.tz(day+starttime, timezone).utc();
-      // endTime = moment.tz(day+endtime, timezone).utc();
-
-      // var timeRange = [[currID,startTime.format("YYYY/MM/DD/HH")].join("/")];
-      // var time = startTime.clone();
-      // while (!time.isSame(endTime)) {
-      //   time.add(1,"hour");
-      //   timeRange.push([currID,time.format("YYYY/MM/DD/HH")].join("/"));
-      // }
-      // // console.log(timeRange);
-      // return timeRange;
   }
 
 // <--- Time Zone --->
@@ -405,7 +372,6 @@ $( function() {
       // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
       if(confirm("You are about to delete all history on:\n\n\t" + printDate+ " " + abbr + "\n\nClick OK to continue.")){
         // console.log(formattedDate[0]);
-        // chrome.runtime.sendMessage({delbyDate: formattedDate, message:'delbyDate'});
         chrome.runtime.sendMessage({prefix: formattedDate, message:'delete'});
         $.datepicker._clearDate("#datepicker1");
         $(this).dialog( "close" );
@@ -473,7 +439,6 @@ $( function() {
         // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
         if(confirm("You are about to delete history in the following time frame (inclusive):\n\n\tfrom: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nClick OK to continue.")){
           // console.log(timeRange);
-          //chrome.runtime.sendMessage({delbyTime : timeRange, message:'delbyTime'});
           chrome.runtime.sendMessage({prefix: formattedTime, message:'delete'});
           $.datepicker._clearDate("#datepicker2");
           dialog2.dialog( "close" );
