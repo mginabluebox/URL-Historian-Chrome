@@ -193,7 +193,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if(attempt > 0) {
           // chrome.browserAction.setIcon({path: "icon_disabled.png"});
           // chrome.storage.sync.set({userID: 'undefined'}, function(){});
-          alert(msg_retry + '\nYou have ' + attempt + " attempt left.");
+          alert(msg_retry + '\n\nYou have ' + attempt + " attempts left.");
           // chrome.storage.sync.set({isPaused: true}, function(){});
         } else { 
           alert(msg_final);
