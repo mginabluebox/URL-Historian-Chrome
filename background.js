@@ -1,12 +1,12 @@
 /* globals chrome, document */
-console.log('Welcome to URL Historian');
+// console.log('Welcome to URL Historian');
 
 //MESSAGES 
-valid_msg = "Welcome and thank you for your participation!!\nURL historian is now active on your browser\n\nTo pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP, please refer to the redirected page"
+valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now active on your browser.\n\nTo pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor any further questions, please contact us at nyu-smapp-engineers@nyu.edu"
 
-msg_retry = "Welcome and thank your for installing URL historian!!\n\nUnfortunately the user ID you entered cannot be verified\n\nPlease check and try again."
+msg_retry = "Welcome to URL Historian!\n\nThe User ID you entered cannot be verified.\n\nPlease enter the ID provided in your survey. If you need to recover your User ID, please contact us at nyu-smapp-engineers@nyu.edu for assistance."
 
-msg_final = "Thank you for your interest in URL Historian\n Unfortunately, multiple attempts to verify the user ID provided have failed\n\nIf you have been recruited to participate in research by CSMaP or our affiliated institution\nPlease contact personell at csmap.org for assistance.\n\nOtherwise only recruited research participants are authorized to use this application\nIf you would like to participate in a study, Please contact personell above.\n\nThis application will now be disabled\nPlease remove the extension from your browser\n\n"
+msg_final = "Thank you for your interest in URL Historian.\n\nUnfortunately, multiple attempts to verify the User ID provided have failed.\n\nIf you are a recruited participant looking to recover your User ID, please email to nyu-smapp-engineers@nyu.edu for assistance.\n\nIf you are not a recruited participant and would like to contribute to a CSMaP study, feel free to contact us at the email above. \n\nURL Historian is now disabled. Please uninstall it from your browser."
 
 var userID ;
 var resource;
@@ -21,7 +21,6 @@ function containsObjectNew(obj, list) {
     var i;
     for (i = 0; i < list.length; i++) {
         if (list[i] === obj) {
-            console.log[i]
             chrome.storage.sync.set({userID: obj}, function(){});
             chrome.storage.sync.set({isPaused: false}, function(){});
             chrome.browserAction.setIcon({path: "icon128.png"});
@@ -39,7 +38,7 @@ function loadConfig(xhr) {
   function getObject(data) {
     validate = data.Body.toString().split('\n');
   };
-
+// console.log(xhr.response)
   config = JSON.parse(xhr.response);
   AWS.config.region = config.bucketRegion; 
   AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -84,12 +83,12 @@ function upload(url) {
       "visit_timestamp": {'N': date.getTime().toString()}
     }
   };
-  console.log(params); // for demo
+
   resource.putItem(params, function(err, data) {
-    if(err) {console.log("Error: ", err);}
-    else console.log("Successfully created item: ", data); // for debug
-    // if (err) console.log(err);
-    // else return 'Successfully created item'; // for release
+    // if(err) {console.log( err);}
+    // else console.log("Successfully created item ", params); // for debug
+    if (err) console.log(err);
+    else return 'Successfully created item'; // for release
   })
 }
 
@@ -131,7 +130,8 @@ function deleteObjects(prefix) {
 
   var paramList = [];
   resource.query(qparam, function(err,data) {
-    if (err) {console.log(err);}
+    // if (err) {console.log(err);} // for debug
+    if (err) return err; // for release
     else {
       var items = data.Items;
       // QUERY RECORDS
@@ -158,16 +158,16 @@ function deleteObjects(prefix) {
           var dparam = {
             RequestItems: {
               "web_browsing" : batchParams[i]
-            },
-            ReturnConsumedCapacity: "INDEXES" // for demo
+            }
+            // ReturnConsumedCapacity: "INDEXES" // for demo
 
           }
           // console.log(dparam);
           resource.batchWriteItem(dparam, function(err,data) {
-            if(err) console.log(err);
-            else console.log(data); // for demo and debug
-            // if (err) console.log(err);
-            // else return 'Records deleted'; // for release
+            // if(err) console.log(err);
+            // else console.log(dparam); // for demo and debug
+            if (err) console.log(err);
+            else return 'Records deleted'; // for release
           });
         } 
       } 
@@ -175,7 +175,7 @@ function deleteObjects(prefix) {
   });
 }
 
-var attempt = 3; 
+var attempt = 10; 
 // RECEIVE MESSAGE FROM POPUP ON USER INPUT
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
@@ -234,7 +234,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
   var reason = details.reason
 
-  console.log(details.reason)
+  // console.log(details.reason)
 
   if (details.reason == "install") {
 
@@ -254,8 +254,9 @@ chrome.runtime.onInstalled.addListener(function(details) {
       loadConfig(xhr)
     
       chrome.storage.sync.get('userID', function(temp) {
-       userID = "" + temp.userID 
-       console.log(userID)});
+        userID = "" + temp.userID; 
+        // console.log(userID);
+      });
        
 
       // check  status

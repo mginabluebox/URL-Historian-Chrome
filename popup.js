@@ -3,7 +3,6 @@
 
 //console.log('Hello')
 var currID;
-var attempt = 10; 
 async function setUserID() {
   var msg = "Welcome to URL Historian. Please enter your User ID!"
   var userInputID = "" + document.getElementById("userID").value;
@@ -75,7 +74,6 @@ function newElement(myStr) {
   document.getElementById("currBlacklist").appendChild(li);
   var span = document.createElement("SPAN");
   var txt = document.createTextNode("\u00D7");
-  //var txt = document.createTextNode("-");
   span.className = "remove";
   txt.className = "rmText";
   span.appendChild(txt);
@@ -99,19 +97,21 @@ function removeItem(div) {
       }
     }
     chrome.storage.sync.set({blacklist: bl}, function(){
-    })
-  })
+    });
+  });
 
   div.parentNode.removeChild(div);
 }
 
 //displays the blacklist onto popup.html
 function writeList(){
-  chrome.storage.sync.get(['userID'], function(temp) {
+  chrome.storage.sync.get(['userID', 'isPaused', 'blacklist'], function(temp) {
     var id = temp.userID;
-    var pl = document.getElementById("userID").placeholder = id;
-  });
-  chrome.storage.sync.get(['isPaused'], function(temp) {
+    if (id === undefined || id === 'undefined') {
+      var pl = document.getElementById("userID").placeholder = 'Enter User ID';
+    } else {
+      var pl = document.getElementById("userID").placeholder = id;
+    }
     var paused = temp.isPaused;
     var pauseLabel = document.getElementById("lbPause");
     var pauseCheckbox = document.getElementById("cbPause");
@@ -123,9 +123,11 @@ function writeList(){
       pauseLabel.innerHTML = "Active";
       pauseCheckbox.checked = true;
     }
-  });
-  chrome.storage.sync.get({blacklist: []}, function(temp) {
-    var bl = temp.blacklist.sort();
+    if (temp.blacklist === undefined || temp.blacklist === 'undefined') {
+      var bl = [];
+    } else {
+      var bl = temp.blacklist.sort();
+    }
     for (var i = 0; i < bl.length; i++) {
       newElement(bl[i]);
     }
@@ -133,17 +135,15 @@ function writeList(){
 }
 
 // Alarm user how long they have paused the extension
-// First alarm fires 1hr after the extension is paused, and then fires every other 30 mins
+// First alarm fires 1hr after the extension is paused, and then fires every other 360 mins
 var alarmOnPause = {
+  onHandler : function(e) {
+      chrome.alarms.create("alarmUser", {delayInMinutes: 60, periodInMinutes: 360} );
+  },
 
-        onHandler : function(e) {
-            chrome.alarms.create("alarmUser", {delayInMinutes: 60, periodInMinutes: 30} );
-        },
-
-        offHandler : function(e) {
-            chrome.alarms.clear("alarmUser");
-        }
-
+  offHandler : function(e) {
+      chrome.alarms.clear("alarmUser");
+  }
 };
 
 
@@ -532,7 +532,7 @@ $( function() {
   // Initialize Help
   $("#btHelp").button().removeClass();
   $("#btHelp").button().on("click", function(){
-    alert("To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor more information about research at CSMaP, please visit https://csmapnyu.org/");
+    alert("To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor any further questions, please contact us at nyu-smapp-engineers@nyu.edu");
   }); 
 
 });
