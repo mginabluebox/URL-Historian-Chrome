@@ -59,7 +59,7 @@ function loadConfig(xhr) {
 
 // LOAD CONFIG FILE 
 var xhr = new XMLHttpRequest();
-xhr.open("GET", chrome.extension.getURL("/.config.json"), true);
+xhr.open("GET", chrome.extension.getURL("/config.json"), true);
 xhr.onreadystatechange = function() {
   if(xhr.readyState ===4 ){
     if(xhr.status === 200) {
