@@ -323,7 +323,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
   alert("URL Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!");
-  pausedMins += 30;
+  pausedMins += 360;
 });
 
 //});
