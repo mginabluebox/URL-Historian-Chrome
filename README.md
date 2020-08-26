@@ -8,13 +8,13 @@ A Chrome extension that enables the collection of web browsing activities in rea
 
 # Notification
 * When the icon appears grey ![icon](icon_disabled_16.png), all activities in the extension are paused. After the extension is activated, the icon will appear in color ![icon](icon16.png). 
-* The extension will send reminders after you pause the extension for 60 minutes. 
+* The extension will send reminders after you pause the extension for 60 minutes. After the first reminder, it will send follow-ups in 6-hour intervals until reactivation. 
 
 # Usage
 ### Login 
 1. Enter your user ID in *User ID*.
 2. Click on **Submit**. The extension will become active ![icon](icon16.png).
-3. After 3 failed login attempts, you will be denied access to the extension's functionalities. You can contact our research team to recover your ID and regain access to the extension. 
+3. After 10 failed login attempts, you will be denied access to the extension's functionalities. You can contact our research team to recover your ID and regain access to the extension. 
 
 ### Pause/Activate the extension 
 * Slide the toggle button to the left to pause ![icon](icon_disabled_16.png), or right to reactivate the extension ![icon](icon16.png).
