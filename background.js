@@ -32,45 +32,71 @@ function containsObjectNew(obj, list) {
   });
 }
 
-// SET CONFIGURATION PARAMETERS
-function loadConfig(xhr) {
+// SET CONFIGURATION PARAMETERS XML ver
+// function loadConfig(xhr) {
+//   // grab object
+//   function getObject(data) {
+//     validate = data.Body.toString().split('\n');
+//   };
+// // console.log(xhr.response)
+//   config = JSON.parse(xhr.response);
+//   AWS.config.region = config.bucketRegion; 
+//   AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+//           IdentityPoolId: config.poolId });
+//   resource = new AWS.DynamoDB({
+//     apiVersion: '2012-08-10'
+//   });
+
+//   s3 = new AWS.S3({
+//         apiVersion: "2006-03-01",
+//         params: {Bucket: config.bucketName,}
+//       });
+//   s3.getObject({ Key: config.idPath}, function(err, data) {
+//         if(err) return err;
+//         getObject(data);
+//   });
+// }
+
+// // LOAD CONFIG FILE 
+// var xhr = new XMLHttpRequest();
+// xhr.open("GET", chrome.extension.getURL("/config.json"), true);
+// xhr.onreadystatechange = function() {
+//   if(xhr.readyState ===4 ){
+//     if(xhr.status === 200) {
+//     return xhr;
+//     }
+//     else {
+//       console.log('Cannot read config file')
+//     }
+//   }
+// };
+// xhr.send();
+
+// SET CONFIGURATION PARAMETERS fetch ver
+function loadConfig() {
   // grab object
   function getObject(data) {
     validate = data.Body.toString().split('\n');
-  };
-// console.log(xhr.response)
-  config = JSON.parse(xhr.response);
-  AWS.config.region = config.bucketRegion; 
-  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-          IdentityPoolId: config.poolId });
-  resource = new AWS.DynamoDB({
-    apiVersion: '2012-08-10'
-  });
-
-  s3 = new AWS.S3({
-        apiVersion: "2006-03-01",
-        params: {Bucket: config.bucketName,}
-      });
-  s3.getObject({ Key: config.idPath}, function(err, data) {
-        if(err) return err;
-        getObject(data);
-  });
-}
-
-// LOAD CONFIG FILE 
-var xhr = new XMLHttpRequest();
-xhr.open("GET", chrome.extension.getURL("/config.json"), true);
-xhr.onreadystatechange = function() {
-  if(xhr.readyState ===4 ){
-    if(xhr.status === 200) {
-    return xhr;
-    }
-    else {
-      console.log('Cannot read config file')
-    }
   }
-};
-xhr.send();
+
+  fetch(chrome.runtime.getURL("/config.json"))
+      .then((response) => {
+        return response.json();
+      })
+      .then((config) => {
+        AWS.config.region = config.bucketRegion; 
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId: config.poolId });
+        s3 = new AWS.S3({
+              apiVersion: "2006-03-01",
+              params: {Bucket: config.bucketName,}
+            });
+        s3.getObject({ Key: config.idPath }, function(err, data) {
+              if(err) return err;
+              getObject(data);
+        });
+      })
+}
 
 // UPLOAD TO DynamoDB
 function upload(url) {
@@ -214,7 +240,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 chrome.runtime.onStartup.addListener(function () {
   // START UP EVENT
-  loadConfig(xhr);
+  // loadConfig(xhr);
+  loadConfig();
     
   chrome.storage.sync.get('userID', function(temp) {
         userID = "" + temp.userID });
@@ -244,14 +271,16 @@ chrome.runtime.onInstalled.addListener(function(details) {
     chrome.browserAction.setIcon({path: "icon_disabled.png"});
   
   // load configuration file
-    loadConfig(xhr)
+    // loadConfig(xhr);
+    loadConfig();
 
     // set plugin to pause
     chrome.storage.sync.set({isPaused: true}, function(){});
 
     } else if (details.reason == 'update') {
 
-      loadConfig(xhr)
+      // loadConfig(xhr);
+      loadConfig();
     
       chrome.storage.sync.get('userID', function(temp) {
         userID = "" + temp.userID; 
