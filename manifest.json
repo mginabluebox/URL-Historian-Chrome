@@ -1,9 +1,9 @@
 {
   "name": "URL Historian",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Url Historian - Enlightening the social impact of the web through your web use",
   "content_security_policy": "script-src 'self' https://ajax.googleapis.com; object-src 'self'",
-  "permissions": ["activeTab","tabs","declarativeContent","storage","background","alarms"],
+  "permissions": ["activeTab","tabs","storage","background","alarms"],
   "icons" : {
     "16": "icon16.png",
     "48": "icon48.png",
@@ -14,7 +14,7 @@
                 "tz/moment.min.js","tz/moment-timezone-with-data.min.js",
                 "tz/select2.min.js",
                 "aws-sdk.min.js","background.js"],
-    "persistent": true
+    "persistent": false
   },
   "browser_action": {
     "default_icon": {
