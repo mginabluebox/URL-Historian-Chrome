@@ -1,28 +1,31 @@
 /* globals chrome, document */
 // console.log('Welcome to URL Historian');
 
-//MESSAGES 
-valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now active on your browser.\n\nTo pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor any further questions, please contact us at nyu-smapp-engineers@nyu.edu"
-
-msg_retry = "Welcome to URL Historian!\n\nThe User ID you entered cannot be verified.\n\nPlease enter the ID provided in your survey. If you need to recover your User ID, please contact us at nyu-smapp-engineers@nyu.edu for assistance."
-
-msg_final = "Thank you for your interest in URL Historian.\n\nUnfortunately, multiple attempts to verify the User ID provided have failed.\n\nIf you are a recruited participant looking to recover your User ID, please email to nyu-smapp-engineers@nyu.edu for assistance.\n\nIf you are not a recruited participant and would like to contribute to a CSMaP study, feel free to contact us at the email above. \n\nURL Historian is now disabled. Please uninstall it from your browser."
-
-var userID ;
+//GLOBAL VARIABLES
 var resource;
 var pause;
 var config;
 var date;
 var validate;
 var pausedMins = 60;
+var landingPage = "https://csmapnyu.org/2020/08/25/csmap-independent-panel-thank-you/";
+
+//MESSAGES 
+valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now active on your browser. You can always click \"Help\" for instructions on how to use our extension. \n\nIf you have any further questions: \nFor technical inquiries, please contact nyu-smapp-engineers@nyu.edu \nFor questions about the data we collect and how your data is used in research projects, please contact csmap-surveys@nyu.edu"
+
+msg_retry = "Welcome to URL Historian!\n\nThe User ID you entered cannot be verified.\n\nPlease enter the ID provided in your survey. If you need to recover your User ID, please contact us at nyu-smapp-engineers@nyu.edu for assistance."
+
+msg_final = "Thank you for your interest in URL Historian.\n\nUnfortunately, multiple attempts to verify the User ID entered have failed.\n\nIf you are a recruited participant, please contact nyu-smapp-engineers@nyu.edu for assistance.\n\nIf you are not a recruited participant and would like to contribute to a CSMaP study, feel free to contact us at the email above. \n\nURL Historian is now disabled. Please uninstall it from your browser."
+
+msg_alert = "URL Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!"
+var userID ;
 
 function containsObjectNew(obj, list) {
   return new Promise(function(resolve) {
     var i;
     for (i = 0; i < list.length; i++) {
         if (list[i] === obj) {
-            chrome.storage.sync.set({userID: obj}, function(){});
-            chrome.storage.sync.set({isPaused: false}, function(){});
+            chrome.storage.sync.set({userID: obj,isPaused:false});
             chrome.browserAction.setIcon({path: "icon128.png"});
             alert(valid_msg);
             resolve(true);
@@ -32,45 +35,70 @@ function containsObjectNew(obj, list) {
   });
 }
 
-// SET CONFIGURATION PARAMETERS
-function loadConfig(xhr) {
+// SET CONFIGURATION PARAMETERS XML ver
+// function loadConfig(xhr) {
+//   // grab object
+//   function getObject(data) {
+//     validate = data.Body.toString().split('\n');
+//   };
+// // console.log(xhr.response)
+//   config = JSON.parse(xhr.response);
+//   AWS.config.region = config.bucketRegion; 
+//   AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+//           IdentityPoolId: config.poolId });
+//   resource = new AWS.DynamoDB({
+//     apiVersion: '2012-08-10'
+//   });
+
+//   s3 = new AWS.S3({
+//         apiVersion: "2006-03-01",
+//         params: {Bucket: config.bucketName,}
+//       });
+//   s3.getObject({ Key: config.idPath}, function(err, data) {
+//         if(err) return err;
+//         getObject(data);
+//   });
+// }
+
+// // LOAD CONFIG FILE 
+// var xhr = new XMLHttpRequest();
+// xhr.open("GET", chrome.extension.getURL("/config.json"), true);
+// xhr.onreadystatechange = function() {
+//   if(xhr.readyState ===4 ){
+//     if(xhr.status === 200) {
+//     return xhr;
+//     }
+//     else {
+//       console.log('Cannot read config file')
+//     }
+//   }
+// };
+// xhr.send();
+
+// SET CONFIGURATION PARAMETERS fetch ver
+function loadConfig() {
   // grab object
   function getObject(data) {
     validate = data.Body.toString().split('\n');
-  };
-// console.log(xhr.response)
-  config = JSON.parse(xhr.response);
-  AWS.config.region = config.bucketRegion; 
-  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-          IdentityPoolId: config.poolId });
-  resource = new AWS.DynamoDB({
-    apiVersion: '2012-08-10'
-  });
-
-  s3 = new AWS.S3({
-        apiVersion: "2006-03-01",
-        params: {Bucket: config.bucketName,}
-      });
-  s3.getObject({ Key: config.idPath}, function(err, data) {
-        if(err) return err;
-        getObject(data);
-  });
-}
-
-// LOAD CONFIG FILE 
-var xhr = new XMLHttpRequest();
-xhr.open("GET", chrome.extension.getURL("/config.json"), true);
-xhr.onreadystatechange = function() {
-  if(xhr.readyState ===4 ){
-    if(xhr.status === 200) {
-    return xhr;
-    }
-    else {
-      console.log('Cannot read config file')
-    }
   }
-};
-xhr.send();
+  fetch(chrome.runtime.getURL("/config.json"))
+      .then((response) => {
+        return response.json();
+      })
+      .then((config) => {
+        AWS.config.region = config.bucketRegion; 
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId: config.poolId });
+        s3 = new AWS.S3({
+              apiVersion: "2006-03-01",
+              params: {Bucket: config.bucketName,}
+            });
+        s3.getObject({ Key: config.idPath }, function(err, data) {
+              if(err) return err;
+              getObject(data);
+        });
+      })
+}
 
 // UPLOAD TO DynamoDB
 function upload(url) {
@@ -83,7 +111,7 @@ function upload(url) {
       "visit_timestamp": {'N': date.getTime().toString()}
     }
   };
-
+  // console.log(params);
   resource.putItem(params, function(err, data) {
     // if(err) {console.log( err);}
     // else console.log("Successfully created item ", params); // for debug
@@ -142,7 +170,7 @@ function deleteObjects(prefix) {
           DeleteRequest: {
             Key: {
               "user_id": {'S' : item.user_id.S},
-              'visit_timestamp' : {'N' : item.visit_timestamp.N}
+              "visit_timestamp" : {'N' : item.visit_timestamp.N}
             }
           }
         }
@@ -179,13 +207,11 @@ var attempt = 10;
 // RECEIVE MESSAGE FROM POPUP ON USER INPUT
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
-    // SET USER ID
-    // userID = request.userID;  
     //VERIFY USER CREDENTIALS    
     containsObjectNew(request.userID, validate).then(function(value) {
       if (value === true) {
         userID = request.userID
-        chrome.tabs.create({url: "https://csmapnyu.org"});
+        chrome.tabs.create({url: landingPage});
         chrome.storage.sync.set({isDeactivated:false});
       } else {
         userID = 'undefined';
@@ -212,16 +238,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 });
 
-chrome.runtime.onStartup.addListener(function () {
-  // START UP EVENT
-  loadConfig(xhr);
-    
-  chrome.storage.sync.get('userID', function(temp) {
-        userID = "" + temp.userID });
+chrome.runtime.onStartup.addListener(function () {    
   // check  status
-  chrome.storage.sync.get(['isPaused'], function(temp) {
-    pause = temp.isPaused;
-    if(pause) {
+  chrome.storage.sync.get(['isPaused','userID'], function(temp) {
+    userID = "" + temp.userID;
+    if(temp.isPaused) {
       chrome.browserAction.setIcon({path: "icon_disabled.png"});
     } 
   });
@@ -229,40 +250,29 @@ chrome.runtime.onStartup.addListener(function () {
 
 
 chrome.runtime.onInstalled.addListener(function(details) {
-
-  // chrome.storage.sync.set({userID: 'Enter User ID'}, function(){})
-
   var reason = details.reason
 
   // console.log(details.reason)
 
-  if (details.reason == "install") {
-
-  //chrome.storage.sync.set({userID: 'Enter User ID'}, function(){});
+  if (reason === "install") {
 
   // first installation 
     chrome.browserAction.setIcon({path: "icon_disabled.png"});
   
   // load configuration file
-    loadConfig(xhr)
+    // loadConfig(xhr);
+    loadConfig();
 
     // set plugin to pause
     chrome.storage.sync.set({isPaused: true}, function(){});
 
-    } else if (details.reason == 'update') {
+    } else if (reason === 'update') {
 
-      loadConfig(xhr)
-    
-      chrome.storage.sync.get('userID', function(temp) {
-        userID = "" + temp.userID; 
-        // console.log(userID);
-      });
-       
-
-      // check  status
-      chrome.storage.sync.get(['isPaused'], function(temp) {
-        pause = temp.isPaused;
-        if(pause) {
+      // loadConfig(xhr);
+      loadConfig();
+      chrome.storage.sync.get(['isPaused','userID'], function(temp) {
+        userID = "" + temp.userID;
+        if(temp.isPaused) {
           chrome.browserAction.setIcon({path: "icon_disabled.png"});
         } 
       });
@@ -322,7 +332,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
   });
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
-  alert("URL Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!");
+  alert(msg_alert);
   pausedMins += 360;
 });
 

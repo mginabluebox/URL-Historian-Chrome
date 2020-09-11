@@ -540,24 +540,24 @@ $( function() {
 // Disalbe extension after three attempts
 getSyncStorageValue("isDeactivated").then(function(isDeactivated) {
   // console.log("what is isDeactivated: ", isDeactivated);
-if (isDeactivated.isDeactivated !== undefined) {
-  isDeactivated = isDeactivated.isDeactivated;
-  // console.log("isDeactivated:", isDeactivated);
-  if (isDeactivated === true) {
-    document.getElementById("userID").disabled = true;
-    document.getElementById("btSubmit").disabled = true;
-    document.getElementById("btAdd").disabled = true;
-    document.getElementById("cbPause").disabled = true;
-    document.getElementById("btDeleteDate").disabled = true;
-    document.getElementById("btDeleteTime").disabled = true;
-    document.getElementById("userInput").disabled = true;
+  if (isDeactivated.isDeactivated !== undefined) {
+    isDeactivated = isDeactivated.isDeactivated;
+    // console.log("isDeactivated:", isDeactivated);
+    if (isDeactivated === true) {
+      document.getElementById("userID").disabled = true;
+      document.getElementById("btSubmit").disabled = true;
+      document.getElementById("btAdd").disabled = true;
+      document.getElementById("cbPause").disabled = true;
+      document.getElementById("btDeleteDate").disabled = true;
+      document.getElementById("btDeleteTime").disabled = true;
+      document.getElementById("userInput").disabled = true;
+    }
   }
-}
-})
+});
 
 
 //link buttons to appropriate functions once website is loaded
-window.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', (event) => {
   document.querySelector('#btSubmit').addEventListener('click', setUserID);
   document.querySelector('#btAdd').addEventListener('click', addElement);
   document.querySelector('#cbPause').addEventListener('change', pauseExtension);
