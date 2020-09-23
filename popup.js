@@ -1,22 +1,19 @@
-
-// var console = chrome.extension.getBackgroundPage().console;
-
+blt_msg = "Please enter website domain to add to the Blacklist!"; 
+msg = "Welcome to URL Historian. Please enter your User ID!"
 //console.log('Hello')
 var currID;
-async function setUserID() {
-  var msg = "Welcome to URL Historian. Please enter your User ID!"
-  var userInputID = "" + document.getElementById("userID").value;
-  chrome.storage.sync.get('userID', function(temp) {
-    currID = "" + temp.userID; 
-  });
-
-  // console.log(userInputID, currID);
-  if (userInputID === '') { 
-    alert(msg);
-  } else if(!(userInputID === currID)) {
-    chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
-    }
-  }
+function setUserID() {
+    var userInputID = "" + document.getElementById("userID").value;
+    chrome.storage.sync.get('userID', function(temp) {
+      currID = "" + temp.userID; 
+      // console.log(userInputID, currID);
+      if (userInputID === '') { 
+        alert(msg);
+      } else if(!(userInputID === currID)) {
+        chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
+      }
+    });
+}
 
 //remove items from blacklist 
 var remove = document.getElementsByClassName("remove");
@@ -39,7 +36,7 @@ for (var i = 0; i < remove.length; i++) {
 function addElement() {
   var inputValue = document.getElementById("userInput").value;
   if (inputValue === '') {
-    alert("Please enter website domain to add to the Blacklist!");
+    alert(msg_blt);
   } else {
     addToBlacklist(inputValue);
   }
@@ -538,10 +535,10 @@ $( function() {
 });
 
 // Disalbe extension after three attempts
-getSyncStorageValue("isDeactivated").then(function(isDeactivated) {
+getSyncStorageValue("isDeactivated").then(function(temp) {
   // console.log("what is isDeactivated: ", isDeactivated);
-  if (isDeactivated.isDeactivated !== undefined) {
-    isDeactivated = isDeactivated.isDeactivated;
+  if (temp.isDeactivated !== undefined) {
+    isDeactivated = temp.isDeactivated;
     // console.log("isDeactivated:", isDeactivated);
     if (isDeactivated === true) {
       document.getElementById("userID").disabled = true;
@@ -558,8 +555,10 @@ getSyncStorageValue("isDeactivated").then(function(isDeactivated) {
 
 //link buttons to appropriate functions once website is loaded
 document.addEventListener('DOMContentLoaded', (event) => {
-  document.querySelector('#btSubmit').addEventListener('click', setUserID);
-  document.querySelector('#btAdd').addEventListener('click', addElement);
-  document.querySelector('#cbPause').addEventListener('change', pauseExtension);
-  writeList();
+  chrome.runtime.getBackgroundPage(function(backgroundPage) {
+    document.querySelector('#btSubmit').addEventListener('click', setUserID);
+    document.querySelector('#btAdd').addEventListener('click', addElement);
+    document.querySelector('#cbPause').addEventListener('change', pauseExtension);
+    writeList();
+  });
 });

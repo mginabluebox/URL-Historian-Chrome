@@ -29,7 +29,7 @@
         <form>
           <div>
               <label for="userID">User ID</label>
-              <input type="text" id="userID" placeholder="User ID" maxlength="20">
+              <input type="text" id="userID" placeholder="Enter User ID" maxlength="20">
               <button type="submit" id="btSubmit" >Submit</button>
           </div>
         </form>
@@ -43,7 +43,7 @@
       </div>
 
       <!-- Delete by Date Dialog -->
-      <div id="deleteByDateForm" title="Delete History by Date" class="g">
+      <div id="deleteByDateForm" title="Delete History by Date" class="g init-hidden">
         <p id="validateTips1" class="validateTips"> </p>
         <form>
           <fieldset style="padding-top:0.3em; padding-bottom:0.3em; line-height:30px">
@@ -57,7 +57,7 @@
       </div>
 
       <!-- Delete by Time Dialog -->
-      <div id="deleteByTimeForm" title="Delete History by Time" class="g">
+      <div id="deleteByTimeForm" title="Delete History by Time" class="g init-hidden">
         <p id="validateTips2" class="validateTips"> </p>
         <label for="timezone2">TimeZone: </label>
         <select id="timezone2" class="js-Selector"></select>
