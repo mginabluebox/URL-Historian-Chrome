@@ -127,7 +127,9 @@
   margin: 2px;
   display: inline-block;
 }
-
+.init-hidden {
+  display:none;
+}
 #btSubmit + #btAdd {
   position: absolute;
   right: 20px;

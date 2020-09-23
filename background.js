@@ -1,35 +1,42 @@
 /* globals chrome, document */
 // console.log('Welcome to URL Historian');
 
-//GLOBAL VARIABLES
-var resource;
-var pause;
-var config;
-var date;
-var validate;
-var pausedMins = 60;
+//Temporary variables
+//List of params in storage: userID, validate, attempt, isDeactivated, paused, pausedMins, blacklist
+var resource; //temp
+var pause; //temp
+var date; //local
 var landingPage = "https://csmapnyu.org/2020/08/25/csmap-independent-panel-thank-you/";
 
 //MESSAGES 
-valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now active on your browser. You can always click \"Help\" for instructions on how to use our extension. \n\nIf you have any further questions: \nFor technical inquiries, please contact nyu-smapp-engineers@nyu.edu \nFor questions about the data we collect and how your data is used in research projects, please contact csmap-surveys@nyu.edu"
-
-msg_retry = "Welcome to URL Historian!\n\nThe User ID you entered cannot be verified.\n\nPlease enter the ID provided in your survey. If you need to recover your User ID, please contact us at nyu-smapp-engineers@nyu.edu for assistance."
-
+valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now active on your browser. You can always click \"Help\" for instructions on how to use our extension. \n\nIf you have any further questions: \nFor technical inquiries regarding the extension, please contact nyu-smapp-engineers@nyu.edu \nFor questions about the data we collect and how your data is used in research projects, please contact csmap-surveys@nyu.edu"
+msg_retry = "Unfortunately, the User ID you entered cannot be verified.\n\nPlease enter the ID provided in your survey. If you need help to recover your User ID, please contact us at nyu-smapp-engineers@nyu.edu for assistance."
 msg_final = "Thank you for your interest in URL Historian.\n\nUnfortunately, multiple attempts to verify the User ID entered have failed.\n\nIf you are a recruited participant, please contact nyu-smapp-engineers@nyu.edu for assistance.\n\nIf you are not a recruited participant and would like to contribute to a CSMaP study, feel free to contact us at the email above. \n\nURL Historian is now disabled. Please uninstall it from your browser."
 
-msg_alert = "URL Historian has been paused for " + pausedMins + " minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!"
-var userID ;
+function setMsgAlert(pausedMins){
+  msg_alert = `URL Historian has been paused for ${pausedMins} minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!`
+  return msg_alert;
+}
 
 function containsObjectNew(obj, list) {
   return new Promise(function(resolve) {
-    var i;
-    for (i = 0; i < list.length; i++) {
-        if (list[i] === obj) {
-            chrome.storage.sync.set({userID: obj,isPaused:false});
-            chrome.browserAction.setIcon({path: "icon128.png"});
-            alert(valid_msg);
-            resolve(true);
-        } 
+    // var i;
+    // for (i = 0; i < list.length; i++) {
+    //     if (list[i] === obj) {
+    //         chrome.storage.sync.set({userID: obj,isPaused:false});
+    //         chrome.browserAction.setIcon({path: "icon128.png"});
+    //         alert(valid_msg);
+    //         resolve(true);
+    //     } 
+    // }
+    // chrome.storage.sync.set({userID: undefined});
+    // resolve(false);
+    if (***REMOVED***) {
+      // console.log("Verified User ID:", obj);
+      chrome.storage.sync.set({userID: obj, isPaused: false});
+      chrome.browserAction.setIcon({path: "icon128.png"});
+      alert(valid_msg);
+      resolve(true);
     }
     resolve(false);
   });
@@ -76,32 +83,40 @@ function containsObjectNew(obj, list) {
 // xhr.send();
 
 // SET CONFIGURATION PARAMETERS fetch ver
-function loadConfig() {
-  // grab object
-  function getObject(data) {
-    validate = data.Body.toString().split('\n');
-  }
-  fetch(chrome.runtime.getURL("/config.json"))
-      .then((response) => {
-        return response.json();
-      })
-      .then((config) => {
-        AWS.config.region = config.bucketRegion; 
-        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-                IdentityPoolId: config.poolId });
-        s3 = new AWS.S3({
-              apiVersion: "2006-03-01",
-              params: {Bucket: config.bucketName,}
-            });
-        s3.getObject({ Key: config.idPath }, function(err, data) {
-              if(err) return err;
-              getObject(data);
-        });
-      })
+// function loadConfigFIRST() {
+//   fetch(chrome.runtime.getURL("/config.json"))
+//   .then((response) => {
+//     return response.json();
+//   })
+//   .then((config) => {
+//     AWS.config.region = config.bucketRegion; 
+//     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+//             IdentityPoolId: config.poolId });
+//     s3 = new AWS.S3({
+//           apiVersion: "2006-03-01",
+//           params: {Bucket: config.bucketName}
+//         });
+//     s3.getObject({ Key: config.idPath }, function(err, data) {
+//           if(err) return err;
+//           else chrome.storage.sync.set({validate: data.Body.toString().split('\n')});
+//     });
+//   })
+// }
+
+async function loadConfig() {
+  let response = await fetch(chrome.runtime.getURL("/config.json"))
+  let config = await response.json();
+  AWS.config.region = config.bucketRegion; 
+  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+          IdentityPoolId: config.poolId });
+  return new AWS.DynamoDB({
+    apiVersion: '2012-08-10'
+  });
 }
 
 // UPLOAD TO DynamoDB
-function upload(url) {
+async function upload(url,userID) {
+  resource = await loadConfig();
   date = new Date();
   var params = {
     TableName: 'web_browsing', 
@@ -110,8 +125,8 @@ function upload(url) {
       "visited_url": {'S': url},
       "visit_timestamp": {'N': date.getTime().toString()}
     }
-  };
-  // console.log(params);
+  }
+  // console.log(params);  
   resource.putItem(params, function(err, data) {
     // if(err) {console.log( err);}
     // else console.log("Successfully created item ", params); // for debug
@@ -121,8 +136,8 @@ function upload(url) {
 }
 
 // DynamoDB DELETE BY DATE OR BY TIME
-function deleteObjects(prefix) {
-
+async function deleteObjects(prefix) {
+  resource = await loadConfig();
   prefix[1] = prefix[1].toString();
   prefix[2] = prefix[2].toString();
   // console.log("starttime is ", prefix[1], 'endtime is ', prefix[2]);
@@ -190,7 +205,6 @@ function deleteObjects(prefix) {
             // ReturnConsumedCapacity: "INDEXES" // for demo
 
           }
-          // console.log(dparam);
           resource.batchWriteItem(dparam, function(err,data) {
             // if(err) console.log(err);
             // else console.log(dparam); // for demo and debug
@@ -203,137 +217,114 @@ function deleteObjects(prefix) {
   });
 }
 
-var attempt = 10; 
+// -----------Listeners------------ //
+chrome.runtime.onStartup.addListener(function () {    
+  // loadConfigFIRST();
+  chrome.storage.sync.get(['isPaused'], function(temp) {
+    if(temp.isPaused) {
+      chrome.browserAction.setIcon({path: "icon_disabled.png"});
+      chrome.storage.sync.set({pausedMins:60, attempt:10});
+    } 
+  });
+});
+
+chrome.runtime.onInstalled.addListener(function(details) {
+  // loadConfigFIRST();
+  var reason = details.reason;
+  if (reason === "install") {
+    chrome.storage.sync.set({isPaused: true, pausedMins: 60, attempt: 10});
+    chrome.browserAction.setIcon({path: "icon_disabled.png"}); 
+  } 
+  else if (reason === 'update') {
+    chrome.storage.sync.get(['isPaused'], function(temp) {
+      if(temp.isPaused) {
+        chrome.browserAction.setIcon({path: "icon_disabled.png"});
+        chrome.storage.sync.set({pausedMins:60, attempt:10});
+      } 
+    });
+  }
+});
+
 // RECEIVE MESSAGE FROM POPUP ON USER INPUT
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
     //VERIFY USER CREDENTIALS    
-    containsObjectNew(request.userID, validate).then(function(value) {
-      if (value === true) {
-        userID = request.userID
-        chrome.tabs.create({url: landingPage});
-        chrome.storage.sync.set({isDeactivated:false});
-      } else {
-        userID = 'undefined';
-        attempt --;
-        if(attempt > 0) {
-          // chrome.browserAction.setIcon({path: "icon_disabled.png"});
-          // chrome.storage.sync.set({userID: 'undefined'}, function(){});
-          alert(msg_retry + '\n\nYou have ' + attempt + " attempts left.");
-          // chrome.storage.sync.set({isPaused: true}, function(){});
-        } else { 
-          alert(msg_final);
-          chrome.storage.sync.set({isDeactivated:true});
-          // chrome.runtime.sendMessage({message: "validationFailure"});
-          
-          // chrome.browserAction.setPopup({popup: ""});
-        }     
-      }
+    chrome.storage.sync.get(['validate','attempt'], function(temp){
+      var validate = temp.validate;
+      var attempt = temp.attempt;
+      containsObjectNew(request.userID, validate).then(function(value) {
+        if (value === true) {
+          chrome.tabs.create({url: landingPage});
+          chrome.storage.sync.set({isDeactivated:false});
+        } 
+        else {
+          attempt --;
+          if(attempt > 0) {
+            alert(msg_retry + '\n\nYou have ' + attempt + " attempts left.");
+            chrome.storage.sync.set({'attempt': attempt});
+          } else { 
+            alert(msg_final);
+            chrome.storage.sync.set({isDeactivated:true});
+          }  
+        }
+      });
     });
   } else if (request.message == "resetPausedTime"){
-      pausedMins = 60;
-  // } else {
+      chrome.storage.sync.set({pausedMins: 60});
   } else if (request.message = 'delete') {
       deleteObjects(request.prefix);
   }
 });
 
-chrome.runtime.onStartup.addListener(function () {    
-  // check  status
-  chrome.storage.sync.get(['isPaused','userID'], function(temp) {
-    userID = "" + temp.userID;
-    if(temp.isPaused) {
-      chrome.browserAction.setIcon({path: "icon_disabled.png"});
-    } 
-  });
-});
-
-
-chrome.runtime.onInstalled.addListener(function(details) {
-  var reason = details.reason
-
-  // console.log(details.reason)
-
-  if (reason === "install") {
-
-  // first installation 
-    chrome.browserAction.setIcon({path: "icon_disabled.png"});
-  
-  // load configuration file
-    // loadConfig(xhr);
-    loadConfig();
-
-    // set plugin to pause
-    chrome.storage.sync.set({isPaused: true}, function(){});
-
-    } else if (reason === 'update') {
-
-      // loadConfig(xhr);
-      loadConfig();
-      chrome.storage.sync.get(['isPaused','userID'], function(temp) {
-        userID = "" + temp.userID;
-        if(temp.isPaused) {
-          chrome.browserAction.setIcon({path: "icon_disabled.png"});
-        } 
-      });
-    };
-  });
-
-  // LISTEN TO TAB CHANGES 
-  chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    // ENSURE USER HAS USED A VALID ID   
-    if (userID !== undefined && userID !== 'undefined') { 
-      var myURL = "" + tab.url;
-      // DO NOTHING IF URL HASNT CHANGED
-      if (!changeInfo.url) return;
-      chrome.storage.sync.get(['isPaused'], function(temp){
-        pause = temp.isPaused;
-        if (!pause) {
-          chrome.storage.sync.get({blacklist: []}, function(temp2) {
-            var bl = temp2.blacklist;
-            //console.log(bl)
-            var m = 0;
-            for (var i = 0; i < bl.length; i++){
-              var t = "" + bl[i];
-              if (myURL.includes(t)){
-                m++;
-              }
-            }
-            // BLACKLIST HEALTH, FINANCIAL, EMPLOYEE,TAX  
-            if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
-            // UNCOMMENT BELOW TO BLACKLIST SITES THAT WILL HAVE THE TERMS IN THE URL
-              // || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
-              // || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
-              // || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
-              // || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("mail")
-              // || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
-              // || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
-              // || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
-              // || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") 
-              // || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") 
-              // || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
-              // || tab.url.toLowerCase().includes("tax")) return;
-            if (m === 0 ){
-             // upload(changeInfo.url,"new");
-             upload(changeInfo.url);
-            } else {
-              // upload("__BLACKLIST__", "blacklisted")
-              upload("__BLACKLIST__");
-              return;
-            }
-          });
-        } else if(pause) {
-          if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
-          // upload("__PAUSED__", "pause")
-          upload("__PAUSED__");
+// LISTEN TO TAB CHANGES 
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  // Do nothign if URL hasn't changed
+  if (!changeInfo.url) return;
+  // ENSURE USER HAS USED A VALID ID   
+  chrome.storage.sync.get(['userID', 'isPaused','blacklist'], function(temp) {
+    userID = temp.userID;
+    pause = temp.isPaused;
+    var bl = temp.blacklist === undefined ? [] : temp.blacklist;
+    if (userID === undefined || userID === 'undefined') return;
+    var myURL = "" + tab.url;
+    if (!pause) {
+        // BLACKLIST HEALTH, FINANCIAL, EMPLOYEE,TAX  
+        if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
+        // UNCOMMENT BELOW TO BLACKLIST SITES THAT WILL HAVE THE TERMS IN THE URL
+          // || tab.url.toLowerCase().includes("login") || tab.url.toLowerCase().includes( "signin") 
+          // || tab.url.toLowerCase().includes("logout")  || tab.url.toLowerCase().includes("log-in") 
+          // || tab.url.toLowerCase().includes("signout") || tab.url.toLowerCase().includes("auth")  
+          // || tab.url.toLowerCase().includes("account") || tab.url.toLowerCase().includes("mail")
+          // || tab.url.toLowerCase().includes("loan") || tab.url.toLowerCase().includes("health") 
+          // || tab.url.toLowerCase().includes("beneficiary") || tab.url.toLowerCase().includes("investment") 
+          // || tab.url.toLowerCase().includes("instanceid") || tab.url.toLowerCase().includes("token") 
+          // || tab.url.toLowerCase().includes("payments") || tab.url.toLowerCase().includes("statements") 
+          // || tab.url.toLowerCase().includes("income") || tab.url.toLowerCase().includes("balance") 
+          // || tab.url.toLowerCase().includes("ira") || tab.url.toLowerCase().includes("retire") 
+          // || tab.url.toLowerCase().includes("tax")) return;
+        // var m = 0;
+        for (var i = 0; i < bl.length; i++){
+          var t = "" + bl[i];
+          if (myURL.includes(t)){
+            upload("__BLACKLIST__", userID);
+            return;
+          }
         }
-      });
+        upload(myURL, userID);
+
+    } else if (pause) {
+      if (!tab.url || tab.url.includes("chrome://") || tab.url.includes("csmapnyu.org")) return;
+      // upload("__PAUSED__", "pause")
+      upload("__PAUSED__", userID);
     }
   });
-
-chrome.alarms.onAlarm.addListener(function(alarm) {
-  alert(msg_alert);
-  pausedMins += 360;
 });
 
-//});
+chrome.alarms.onAlarm.addListener(function(alarm) {
+  chrome.storage.sync.get("pausedMins",function(temp){
+    pausedMins = temp.pausedMins;
+    alert(setMsgAlert(pausedMins));
+    pausedMins += 360;
+    chrome.storage.sync.set({"pausedMins": pausedMins});
+  });
+});
