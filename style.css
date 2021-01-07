@@ -1,3 +1,20 @@
+#container {
+  display: grid;
+}
+
+/*Icon and title*/
+h3 {
+  float:left;
+  font-size:20px;
+}
+
+#csmap-icon {
+  position: absolute;
+  left: -50px;
+  display: inline;
+}
+
+
 /* The switch */
 .switch {
   position: relative;
@@ -5,6 +22,7 @@
   width: 40px;
   height: 20px;
   float:right;
+  margin-top:9px;
 }
 
 /* Hide default HTML checkbox */
@@ -64,18 +82,18 @@
 #cbPause:disabled + .slider {
   cursor:not-allowed;
 }
+
 /* style of popup window */
 .a, .b, .c, .d, .e, .f{
   position: relative;
   background-color: lavender ;
   opacity: 0.9;
-  padding: 2px;
+  padding: 3px;
   border: 0.2px;
   border-radius: 3px;
   font-size: 18px;
   line-height: 24px;
   font-weight: 300;
-  padding-bottom: 1px;
 }
 
 .wrapper {
@@ -83,21 +101,25 @@
   grid-template-columns: repeat(3, 1fr); /* or 2fr 1fr 2fr; -  three columns 1fr = 200px */
   grid-auto-rows:minmax(45px, auto);
   column-gap: 2px;
-  grid-gap: 1px;
+  grid-gap: 2px;
   row-gap: 2px;
-}
-
-.b {
-  grid-area: 2 / 1 / span 1 / span 1;
 }
 
 .a {
   grid-area: 2 / 2  / span 1 / span 2;
 }
 
+.b {
+  grid-area: 2 / 1 / span 1 / span 1;
+}
+
 .c {
   grid-area: 4 / 1  / span 1 / span 3;
+  display:inline-grid;
+  grid-template-columns: 1fr auto auto;
+  min-height: 0;
 }
+
 .d {
   grid-area: 5 / 1  / span 1 / span 3;
 }
@@ -127,35 +149,9 @@
   margin: 2px;
   display: inline-block;
 }
+
 .init-hidden {
   display:none;
-}
-#btSubmit + #btAdd {
-  position: absolute;
-  right: 20px;
-}
-
-#btDeleteDate  {
-  margin-top: 1px;
-  position: absolute;
-  right: 75px;
-  display: inline-block;
-}
-
-#btDeleteTime {
-  margin-top: 1px;
-  position: absolute;
-  right: 2px;
-  display: inline-block;
-}
-
-#btHelp{
-  padding:2px;
-  padding-left:4px;
-  margin-top:14px !important;
-  margin-right:8px !important;
-  font-size:12px;
-  border-width:1.5px;
 }
 
 .validateTips { 
@@ -199,6 +195,12 @@
   height:23px !important;
 }
 
+.mainlb {
+  display:inline-block;
+  margin-top: 6.5px;
+  margin-left:3px;
+}
+
 fieldset {
   border: 1px solid grey;
   border-radius: 6px;
@@ -208,12 +210,10 @@ fieldset {
 }
 
 button {
-  margin-top: 0.1px;
+  margin: 1px 1px;
   float: right;
   outline: none;
-  padding: 8px 5px;
-  display: inline-block;
-  margin: 1px 1px;
+  padding: 8.5px 5px;
   font-size: 16px;
   border-radius: 6px;
 }
@@ -227,7 +227,7 @@ button:active {
   border-radius: 8px;
 }
 
-input  {
+input {
   border-radius: 6px;
   border: 2px double #008081;
   background-color: whitesmoke;
@@ -254,43 +254,57 @@ button:disabled, button:disabled:hover {
   background-color:grey;
 }
 
-#container {
-  display: grid;
+#btAdd {
+  min-height:0;
+  padding: 8.5px 15px;
+}
+
+#btDeleteDate  {
+  padding:8.5px 25px;
+  margin-top: 1px;
+  position: relative;
+  display: inline-block;
+}
+
+#btDeleteTime {
+  padding:8.5px 25px;
+  margin-top: 1px;
+  position: relative;
+  margin-right: 1px;
+  display: inline-block;
+}
+
+#btHelp{
+  padding:2px;
+  padding-left:4px;
+  margin-top:14px !important;
+  margin-right:8px !important;
+  font-size:12px;
+  border-width:1.5px;
+}
+
+#btLg{
+  padding:2px;
+  padding-left:4px;
+  position:relative;
+  margin-top:14px !important;
+  margin-right:5px;
+  font-size:12px;
+  border-width:1.5px;
 }
 
 .d ul {
+  margin-top:5px;
   color: #008081;
   list-style-type: none;
 }
 
 .d li {
-  margin-left: -30px;
-  margin-top: -8px;
-}
-
-.c label {
-  width:208px;
-  display:inline-block;
-}
-
-.c button {
-  margin-top: 0.001px;
-  margin-right: 10px;
-  padding: 8px 10px;
-}
-
-h3 {
-  float:left;
-  font-size:20px;
-}
-
-#csmap-icon {
-  position: absolute;
-  left: -50px;
-  display: inline;
+  margin: -5px -30px;
 }
 
 .remove {
+  cursor: pointer;
   padding-left: 3px;
   padding-right: 3px;
   margin-left: 1%;

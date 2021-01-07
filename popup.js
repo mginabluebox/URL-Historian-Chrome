@@ -1,14 +1,32 @@
+// global variables
+// alert and dialog messages
 blt_msg = "Please enter website domain to add to the Blacklist!"; 
 msg = "Welcome to URL Historian. Please enter your User ID!"
-//console.log('Hello')
+help_msg = "To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor any further questions, please contact us at nyu-smapp-engineers@nyu.edu"
+login_first_msg = "Please log in with your UserID first."
+select_date_msg = "Select a date on which you wish to delete history and the time zone you were in."
+select_time_msg = "Select a time frame to delete history and the time zone you were in. "
+valid_date_msg = "Please select a valid date."
+valid_time_msg = "Please select a valid time frame."
+
+blt_msg_spanish = "¡Por favor introduce el dominio web que quieras agregar a la Lista Negra! (Blacklist)"
+msg_spanish = "Bienvenido al URL Historian. ¡Por favor entra tu ID de Usuario!"
+help_msg_spanish = "Para pausar la actividad\n\tDesliza el botón de opción hacia la izquierda\nPara eliminar tu historial de navegación\n\tpor Fecha\n\t\t1. Haz click en el botón \"por Fecha\"\n\t\t2. Selecciona el huso horario en el que estabas\n\t\t3. Selecciona una fecha para borrar\n\t\t4. Haz click en el botón \"Borrar\" \n\t\t5. Confirma la fecha de borrado\n\tpor Hora\n\t\t1. Haz click en el botón \"por Hora\" \n\t\t2. Selecciona el huso horario en el que estabas \n\t\t3. Selecciona la fecha y rango de tiempo para eliminar\n\t\t4. Haz click en el botón \"Borrar\" \n\t\t5. Confirma la fecha y hora de borrado\nPara páginas web que quieras excluir\n\t1. Introduce el dominio web en \"agregar a una página web en la Lista Negra\"\n\t2. Haz click en el botón \"Agregar\"\nPara eliminar una página web de la lista negra actual\n\t haz click en la X junto a la página web\n\nPara más preguntas, por favor contáctanos en nyu-smapp-engineers@nyu.edu"
+login_first_msg_spanish = "Por favor primero ingresa con tu ID de Usuario."
+select_date_msg_spanish = "Selecciona una fecha para la cual quieres borrar tu historial y selecciona el huso horario en el que estabas."
+select_time_msg_spanish = "Selecciona un rango de tiempo para el cual quieras borrar tu historial y selecciona el huso horario en el que estabas."
+valid_date_msg_spanish = "Por favor selecciona una fecha válida."
+valid_time_msg_spanish = "Por favor selecciona un rango de tiempo válido."
+
 var currID;
 function setUserID() {
     var userInputID = "" + document.getElementById("userID").value;
-    chrome.storage.sync.get('userID', function(temp) {
+    chrome.storage.sync.get(['userID','spanish'], function(temp) {
       currID = "" + temp.userID; 
       // console.log(userInputID, currID);
       if (userInputID === '') { 
-        alert(msg);
+        if (temp.spanish) alert(msg_spanish);
+        else alert(msg);
       } else if(!(userInputID === currID)) {
         chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
       }
@@ -34,13 +52,18 @@ for (var i = 0; i < remove.length; i++) {
 
 //gets nonempty website name to add to blacklist
 function addElement() {
-  var inputValue = document.getElementById("userInput").value;
-  if (inputValue === '') {
-    alert(msg_blt);
-  } else {
-    addToBlacklist(inputValue);
-  }
-  document.getElementById("userInput").value = "";
+  chrome.storage.sync.get('spanish', function(temp) {
+    spanish = temp.spanish;
+    var inputValue = document.getElementById("userInput").value;
+    if (inputValue === '') {
+      if (spanish) alert(blt_msg_spanish);
+      else alert(blt_msg);
+    } else {
+      addToBlacklist(inputValue);
+    }
+    document.getElementById("userInput").value = "";
+  })
+  
 }
 
 //adds nonduplicate website name to blacklist
@@ -100,26 +123,32 @@ function removeItem(div) {
   div.parentNode.removeChild(div);
 }
 
-//displays the blacklist onto popup.html
-function writeList(){
-  chrome.storage.sync.get(['userID', 'isPaused', 'blacklist'], function(temp) {
+// display content onto popup.html
+function writeContent(changeLg){
+  chrome.storage.sync.get(['userID', 'isPaused', 'blacklist','spanish'], function(temp) {
+    isSpanish = temp.spanish;
+    ph_text = 'Enter User ID';
+    ph_text_spanish = 'Enter User ID (S)'
+    // set placeholder for user id
     var id = temp.userID;
     if (id === undefined || id === 'undefined') {
-      var pl = document.getElementById("userID").placeholder = 'Enter User ID';
+      var pl = document.getElementById("userID").placeholder = isSpanish ? ph_text_spanish : ph_text;
     } else {
       var pl = document.getElementById("userID").placeholder = id;
     }
+    // set pause/active
     var paused = temp.isPaused;
     var pauseLabel = document.getElementById("lbPause");
     var pauseCheckbox = document.getElementById("cbPause");
-    if(paused){
-      pauseLabel.innerHTML = "Paused";
+    if (paused){
+      pauseLabel.innerHTML = isSpanish ? "Paused (S)" : "Paused";
       pauseCheckbox.checked = false;
 
     } else {
-      pauseLabel.innerHTML = "Active";
+      pauseLabel.innerHTML = isSpanish ? "Active (S)" : "Active";
       pauseCheckbox.checked = true;
     }
+    // set blacklist 
     if (temp.blacklist === undefined || temp.blacklist === 'undefined') {
       var bl = [];
     } else {
@@ -127,6 +156,11 @@ function writeList(){
     }
     for (var i = 0; i < bl.length; i++) {
       newElement(bl[i]);
+    }
+
+    if (changeLg) {
+      if (isSpanish) window.location.replace("popup_spanish.html");
+      else window.location.replace("popup.html");
     }
   });
 }
@@ -145,23 +179,25 @@ var alarmOnPause = {
 
 
 function pauseExtension(){
-  chrome.storage.sync.get(['isPaused', 'userID'], function(temp) {
+  chrome.storage.sync.get(['isPaused', 'userID','spanish'], function(temp) {
+    isSpanish = temp.spanish;
     // console.log(temp.userID + " " + temp.isPaused);
     if (temp.userID === undefined) {
       document.getElementById("cbPause").checked = false;
-      alert("Welcome to URL Historian. Please log in with your User ID!");
+      if (isSpanish) alert(msg_spanish);
+      else alert(msg);
     } else {
       var paused = !temp.isPaused;
       chrome.storage.sync.set({isPaused: paused});
       var pauseLabel = document.getElementById("lbPause");
       if(paused){
         chrome.browserAction.setIcon({path: "icon_disabled.png"});
-        pauseLabel.innerHTML = "Paused";
+        pauseLabel.innerHTML = isSpanish ? "Paused (S)" : "Paused";
         // CREATE ALARM
         alarmOnPause.onHandler();
       } else {
         chrome.browserAction.setIcon({path: "icon128.png"});
-        pauseLabel.innerHTML = "Active";
+        pauseLabel.innerHTML = isSpanish ? "Active (S)":"Active";
         // CLEAR ALARM
         alarmOnPause.offHandler();
         chrome.runtime.sendMessage({message:"resetPausedTime"});
@@ -169,20 +205,78 @@ function pauseExtension(){
     }
   });
 }
-  // Get value from chrome.storage using key
-  // Asynchronous. Used in async functions and with 'await' keyword
-  async function getSyncStorageValue(key) {
-    return new Promise((resolve, reject) => {
-      try {
-        chrome.storage.sync.get(key, function(temp){ 
-          resolve(temp);
+// Get value from chrome.storage using key
+// Asynchronous. Used in async functions and with 'await' keyword
+async function getSyncStorageValue(key) {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.sync.get(key, function(temp){ 
+        resolve(temp);
+      });
+    }
+    catch (ex) {
+      reject(ex);
+    }
+  });
+}
+
+// function showSpanish(isPaused){
+//   // labels 
+//   document.getElementById('userIDlb').innerHTML = 'User ID (S)';
+//   document.getElementById('lbPause').innerHTML = isPaused ? 'Paused (S)' : 'Active (S)';
+//   document.getElementById('deleteHistorylb').innerHTML = 'Delete browse history (S)'
+//   document.getElementById('blacklistlb').innerHTML = 'Blacklist a website (S)'
+//   document.getElementById('cbllb').innerHTML = 'Current Blacklisted Websites (S)'
+//   document.getElementById('titlelb').innerHTML = 'URL Historian (S)'
+//   // buttons
+//   document.getElementById('btLg').innerHTML = 'English<span class="ui-icon ui-icon-transferthick-e-w">';
+//   document.getElementById('btHelp').innerHTML = 'Help (S)<span class="ui-icon ui-icon-help"></span>';
+//   document.getElementById('btSubmit').innerHTML = 'Submit (S)'
+//   document.getElementById('btDeleteDate').innerHTML = 'by Date (S)'
+//   document.getElementById('btDeleteTime').innerHTML = 'by Time (S)'
+//   document.getElementById('btAdd').innerHTML = 'Add (S)'
+//   //dialog 
+
+
+// }
+
+// function showEnglish(isPaused){
+//   // labels 
+//   document.getElementById('userIDlb').innerHTML = 'User ID'
+//   document.getElementById('lbPause').innerHTML = isPaused ? 'Paused' : 'Active';
+//   document.getElementById('deleteHistorylb').innerHTML = 'Delete browse history'
+//   document.getElementById('blacklistlb').innerHTML = 'Blacklist a website'
+//   document.getElementById('cbllb').innerHTML = 'Current Blacklisted Websites'
+//   document.getElementById('titlelb').innerHTML = 'URL Historian'
+//   // buttons 
+//   document.getElementById('btLg').innerHTML = 'Español<span class="ui-icon ui-icon-transferthick-e-w">';
+//   document.getElementById('btHelp').innerHTML = 'Help<span class="ui-icon ui-icon-help"></span>';
+//   document.getElementById('btSubmit').innerHTML = 'Submit'
+//   document.getElementById('btDeleteDate').innerHTML = 'by Date'
+//   document.getElementById('btDeleteTime').innerHTML = 'by Time'
+//   document.getElementById('btAdd').innerHTML = 'Add'
+// }
+
+// Switch between Spanish and English
+function changeLanguage(){
+  chrome.storage.sync.get('spanish',function(temp){
+    if (temp.spanish) { // change to english
+      chrome.storage.sync.set({'spanish':false}, function(){
+        chrome.browserAction.setPopup({popup: "popup.html"}, function() {
+          writeContent(true);
         });
-      }
-      catch (ex) {
-        reject(ex);
-      }
-    });
-  }
+      });
+      
+    } else { //change to spanish
+      chrome.storage.sync.set({'spanish': true},function(){
+        chrome.browserAction.setPopup({popup:"popup_spanish.html"}, function() {
+          writeContent(true);
+        });
+      });
+        // showSpanish(temp.isPaused);
+    }
+  });
+}
 
 // Request Data Deletion
 $( function() {
@@ -230,13 +324,6 @@ $( function() {
 
 // <--- Time Zone --->
 // Code modified from https://matall.in/posts/building-an-usable-timezone-selector/
-  const _t = (s) => {
-    if (i18n !== void 0 && i18n[s]) {
-      return i18n[s];
-    }
-    return s;
-  };
-
   const i18n = {
     "Etc/GMT+12": "International Date Line West",
     "Pacific/Midway": "Midway Island, Samoa",
@@ -316,6 +403,98 @@ $( function() {
     "Pacific/Tongatapu": "Nuku'alofa"
   }
 
+  const i18n_spanish = {
+    "Etc/GMT+12": "Línea Internacional de Cambio de Fecha Oriente",
+    "Pacific/Midway": "Isla Midway, Samoa",
+    "Pacific/Honolulu": "Hawaii",
+    "America/Juneau": "Alaska",
+    "America/Dawson": "Hora de Pacífico (USA y Canadá); Tijuana",
+    "America/Boise": "Hora de la Montaña (USA y Canadá)",
+    "America/Chihuahua": "Chihuahua, La Paz, Mazatlán",
+    "America/Phoenix": "Arizona",
+    "America/Chicago": "Hora Central (USA y Canadá)",
+    "America/Regina": "Saskatchewan",
+    "America/Mexico_City": "Guadalajara, Ciudad de México, Monterrey",
+    "America/Belize": "América Central",
+    "America/New_York": "Hora del Este (USA y Canadá)",
+    "America/Indiana/Indianapolis": "Indiana (Este)",
+    "America/Bogota": "Bogotá, Lima, Quito",
+    "America/Glace_Bay": "Hora del Atlántico (Canadá)",
+    "America/Caracas": "Caracas, La Paz",
+    "America/Santiago": "Santiago",
+    "America/St_Johns": "Newfoundland y Labrador",
+    "America/Sao_Paulo": "Brasilia",
+    "America/Argentina/Buenos_Aires": "Buenos Aires, Georgetown",
+    "America/Godthab": "Greenland",
+    "Etc/GMT+2": "Atlántico medio",
+    "Atlantic/Azores": "Azores",
+    "Atlantic/Cape_Verde": "Islas de Cabo Verde",
+    "GMT": "Dublin, Edinburgo, Lisboa, Londres",
+    "Africa/Casablanca": "Casablanca, Monrovia",
+    "Atlantic/Canary": "Islas Canarias",
+    "Europe/Belgrade": "Belgrado, Bratislava, Budapest, Ljubljana, Praga",
+    "Europe/Sarajevo": "Sarajevo, Skopje, Varsovia, Zagreb",
+    "Europe/Brussels": "Bruselas, Copenhague, Madrid, Paris",
+    "Europe/Amsterdam": "Ámsterdam, Berlín, Berna, Roma, Estocolmo, Viena",
+    "Africa/Algiers": "África Central Occidental",
+    "Europe/Bucharest": "Bucarest",
+    "Africa/Cairo": "Cairo",
+    "Europe/Helsinki": "Helsinki, Kiev, Riga, Sofia, Tallinn, Vilnius",
+    "Europe/Athens": "Atenas, Istanbul, Minsk",
+    "Asia/Jerusalem": "Jerusalén",
+    "Africa/Harare": "Harare, Pretoria",
+    "Europe/Moscow": "Moscú, St. Petersburg, Volgograd",
+    "Asia/Kuwait": "Kuwait, Riyadh",
+    "Africa/Nairobi": "Nairobi",
+    "Asia/Baghdad": "Baghdad",
+    "Asia/Tehran": "Tehran",
+    "Asia/Dubai": "Abu Dhabi, Muscat",
+    "Asia/Baku": "Baku, Tbilisi, Yerevan",
+    "Asia/Kabul": "Kabul",
+    "Asia/Yekaterinburg": "Ekaterinburg",
+    "Asia/Karachi": "Islamabad, Karachi, Tashkent",
+    "Asia/Kolkata": "Chennai, Kolkata, Mumbai, New Delhi",
+    "Asia/Kathmandu": "Kathmandu",
+    "Asia/Dhaka": "Astana, Dhaka",
+    "Asia/Colombo": "Sri Jayawardenepura",
+    "Asia/Almaty": "Almaty, Novosibirsk",
+    "Asia/Rangoon": "Yangon Rangoon",
+    "Asia/Bangkok": "Bangkok, Hanoi, Jakarta",
+    "Asia/Krasnoyarsk": "Krasnoyarsk",
+    "Asia/Shanghai": "Beijing, Chongqing, Hong Kong SAR, Urumqi",
+    "Asia/Kuala_Lumpur": "Kuala Lumpur, Singapore",
+    "Asia/Taipei": "Taipei",
+    "Australia/Perth": "Perth",
+    "Asia/Irkutsk": "Irkutsk, Ulaanbaatar",
+    "Asia/Seoul": "Seoul",
+    "Asia/Tokyo": "Osaka, Sapporo, Tokyo",
+    "Asia/Yakutsk": "Yakutsk",
+    "Australia/Darwin": "Darwin",
+    "Australia/Adelaide": "Adelaide",
+    "Australia/Sydney": "Canberra, Melbourne, Sydney",
+    "Australia/Brisbane": "Brisbane",
+    "Australia/Hobart": "Hobart",
+    "Asia/Vladivostok": "Vladivostok",
+    "Pacific/Guam": "Guam, Port Moresby",
+    "Asia/Magadan": "Magadan, Islas Solomon, Nueva Caledonia",
+    "Pacific/Fiji": "Islas Fiji, Kamchatka, Islas Marshall ",
+    "Pacific/Auckland": "Auckland, Wellington",
+    "Pacific/Tongatapu": "Nuku'alofa"
+  }
+
+  const _t = (s) => {
+    if (i18n !== void 0 && i18n[s]) {
+      return i18n[s];
+    }
+    return s;
+  };
+  const _t_spanish = (s) => {
+    if (i18n_spanish !== void 0 && i18n_spanish[s]) {
+      return i18n_spanish[s];
+    }
+    return s;
+  }
+
   const timezones = Object.keys(i18n);
 
   const selectorOptions = moment.tz.names()
@@ -339,9 +518,39 @@ $( function() {
       return memo.concat(`<option value="${tz.name}">(UTC${timezone}) ${_t(tz.name)}</option>`);
     }, "");
 
+  const selectorOptions_spanish = moment.tz.names()
+    .filter(tz => {
+      return timezones.includes(tz)
+    })
+    .reduce((memo, tz) => {
+      memo.push({
+        name: tz,
+        offset: moment.tz(tz).utcOffset()
+      });
+      
+      return memo;
+    }, [])
+    .sort((a, b) => {
+      return a.offset - b.offset
+    })
+    .reduce((memo, tz) => {
+      const timezone = tz.offset ? moment.tz(tz.name).format('Z') : '';
+
+      return memo.concat(`<option value="${tz.name}">(UTC${timezone}) ${_t_spanish(tz.name)}</option>`);
+    }, "");
+
   // document.querySelector("#timezone1").innerHTML = ["<option value=''> --Select-- </option>", selectorOptions].join('');
-  document.querySelector("#timezone1").innerHTML = selectorOptions;
-  document.querySelector("#timezone2").innerHTML = selectorOptions;
+  getSyncStorageValue('spanish').then(function(temp) {
+    spanish = temp.spanish;
+    if (spanish) {
+      document.querySelector("#timezone1").innerHTML = selectorOptions_spanish;
+      document.querySelector("#timezone2").innerHTML = selectorOptions_spanish;
+    } else {
+      document.querySelector("#timezone1").innerHTML = selectorOptions;
+      document.querySelector("#timezone2").innerHTML = selectorOptions;
+    }
+  });
+  
 
 // <---- Delete history by date ---->
   // Format date time for confirmation window
@@ -353,29 +562,32 @@ $( function() {
   }
   // Get date selected by user
   async function getDateforByDate(values) {
-    var date = $("#datepicker1").datepicker("getDate");
-    var currID = await getSyncStorageValue('userID');
-    var timezone = $("#timezone1").val();
-    currID = '' + currID.userID;
-    //console.log("currid: " +  currID);
-    // ENSURE USER IS LOGGED IN
-    if (currID === 'undefined') {
-      updateTips("#validateTips1", "Please log in with your UserID first.")
-    } 
-    else if (date !== null && date instanceof Date && timezone !== '') {
-      var formattedDate = formatDateTime(currID, date, timezone, starttime='',endtime='');
-      var abbr = moment.tz.zone(timezone).abbr(date.getTime());
-      var printDate = formatPrintDateTime(date);
-      // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-      if(confirm("You are about to delete all history on:\n\n\t" + printDate+ " " + abbr + "\n\nClick OK to continue.")){
-        // console.log(formattedDate[0]);
-        chrome.runtime.sendMessage({prefix: formattedDate, message:'delete'});
-        $.datepicker._clearDate("#datepicker1");
-        $(this).dialog( "close" );
+    getSyncStorageValue(['spanish','userID']).then(function(temp){
+      var spanish = temp.spanish;
+      var date = $("#datepicker1").datepicker("getDate");
+      var currID = temp.userID;
+      var timezone = $("#timezone1").val();
+      // ENSURE USER IS LOGGED IN
+      if (currID === 'undefined') {
+          if (spanish) updateTips("#validateTips1", login_first_msg_spanish);
+          else updateTips("#validateTips1", login_first_msg);
+      } 
+      else if (date !== null && date instanceof Date && timezone !== '') {
+        var formattedDate = formatDateTime(currID, date, timezone, starttime='',endtime='');
+        var abbr = moment.tz.zone(timezone).abbr(date.getTime());
+        var printDate = formatPrintDateTime(date);
+        // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
+        if(spanish ? confirm("spanish delete confim") : confirm("You are about to delete all history on:\n\n\t" + printDate+ " " + abbr + "\n\nClick OK to continue.")){
+          // console.log(formattedDate[0]);
+          chrome.runtime.sendMessage({prefix: formattedDate, message:'delete'});
+          $.datepicker._clearDate("#datepicker1");
+          dialog1.dialog( "close" );
+        }
+      } else {  
+        if (spanish) updateTips("#validateTips1",valid_date_msg_spanish);
+        else updateTips("#validateTips1",valid_date_msg);
       }
-    } else {  
-      updateTips("#validateTips1","Please select a valid date.");
-    } 
+    }); 
   }
 
   // Dialog window config
@@ -398,102 +610,116 @@ $( function() {
   // Initialize by Date 
   $("#btDeleteDate").button().removeClass();
   $( "#btDeleteDate" ).button().on("click", function() {
-    $("#validateTips1").text("Select a date on which you wish to delete history and the time zone you were in.");
-    dialog1.dialog('open');
-    $( "#datepicker1" ).datepicker({
-      showOtherMonths: true,
-      selectOtherMonths:true,
-      minDate: -6, maxDate: 0
-    }).blur(); 
-    $("#timezone1").val("America/New_York");
-    $("#timezone1").select2();
-
+    getSyncStorageValue('spanish').then(function(temp){
+      spanish = temp.spanish;
+      if (spanish) $("#validateTips1").text(select_date_msg_spanish);
+      else $("#validateTips1").text(select_date_msg);
+      dialog1.dialog('open');
+      $( "#datepicker1" ).datepicker({
+        showOtherMonths: true,
+        selectOtherMonths:true,
+        minDate: -6, maxDate: 0
+      },$.datepicker.regional[ region ]).blur(); 
+      $("#timezone1").val("America/New_York");
+      $("#timezone1").select2();
+    });
   });
 
 // <---- Delete history by time range ---->
   // Get date and time frame selected by user
   async function getDateTime(){
-    var date = $("#datepicker2").datepicker("getDate");
-    var startTime = $("#startTime").val(); 
-    var endTime = $("#endTime").val(); 
-    var singleTime = $("#singleTime").val();
-    var currID = await getSyncStorageValue('userID');
-    var timezone = $("#timezone2").val();
-    currID = '' + currID.userID;
+    getSyncStorageValue(['spanish','userID']).then(function(temp){
+      var spanish = temp.spanish;
+      var date = $("#datepicker2").datepicker("getDate");
+      var startTime = $("#startTime").val(); 
+      var endTime = $("#endTime").val(); 
+      var singleTime = $("#singleTime").val();
+      var currID = temp.userID;
+      var timezone = $("#timezone2").val();
+      // ENSURE USER IS LOGGED IN 
+      if (currID === 'undefined') {
+        if (spanish) updateTips("#validateTips2", login_first_msg_spanish);
+        else updateTips("#validateTips2", login_first_msg);
+      } 
+      else if (date !== null && timezone !== '') {
+        // DELETE BY HOUR RANGE
+        if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
+          var formattedTime = formatDateTime(currID, date, timezone, starttime=startTime, endtime=endTime);
+          var printST = formatPrintDateTime(date, startTime);
+          var printET = formatPrintDateTime(date, endTime);
+          var abbr = moment.tz.zone(timezone).abbr(date.getTime());
 
-    if (currID === 'undefined') {
-      updateTips("#validateTips2", "Please log in with your UserID first.")
-    } 
-    else if (date !== null && timezone !== '') {
-      // DELETE BY HOUR RANGE
-      if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
-        var formattedTime = formatDateTime(currID, date, timezone, starttime=startTime, endtime=endTime);
-        
-        var printST = formatPrintDateTime(date, startTime);
-        var printET = formatPrintDateTime(date, endTime);
-        var abbr = moment.tz.zone(timezone).abbr(date.getTime());
+          // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
+          if(spanish ? confirm("Estas apunto de borrar tu historial de navegación (inclusive):\n\n\tdesde: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nHaz click en OK para continuar.") : confirm("You are about to delete history in the following time frame (inclusive):\n\n\tfrom: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nClick OK to continue.")){
+            // console.log(timeRange);
+            chrome.runtime.sendMessage({prefix: formattedTime, message:'delete'});
+            $.datepicker._clearDate("#datepicker2");
+            dialog2.dialog( "close" );
+          }
+        // DELETE BY SINGLE HOUR
+        } else if (singleTime !== '') {
+          var timeSingle = formatDateTime(currID, date, timezone, starttime=singleTime, endTime = '');
 
-        // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-        if(confirm("You are about to delete history in the following time frame (inclusive):\n\n\tfrom: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nClick OK to continue.")){
-          // console.log(timeRange);
-          chrome.runtime.sendMessage({prefix: formattedTime, message:'delete'});
-          $.datepicker._clearDate("#datepicker2");
-          dialog2.dialog( "close" );
-        }
-      // DELETE BY SINGLE HOUR
-      } else if (singleTime !== '') {
-        var timeSingle = formatDateTime(currID, date, timezone, starttime=singleTime, endTime = '');
-
-        var printST = formatPrintDateTime(date,singleTime);
-        var abbr = moment.tz.zone(timezone).abbr(date.getTime());
-        // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-        if(confirm("You are about to delete history of the following hour: \n\n\t" + printST + " " + abbr + "\n\nClick OK to continue.")){
-          // console.log(timeSingle);
-          // chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
-          chrome.runtime.sendMessage({prefix: timeSingle, message:'delete'});
-          $.datepicker._clearDate("#datepicker2");
-          dialog2.dialog( "close" );
+          var printST = formatPrintDateTime(date,singleTime);
+          var abbr = moment.tz.zone(timezone).abbr(date.getTime());
+          // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
+          if(spanish ?  confirm("Estas apunto de borrar tu historial de navegación de la siguiente hora: \n\n\t" + printST + " " + abbr + "\n\nHaz click en OK para continuar.") : confirm("You are about to delete history of the following hour: \n\n\t" + printST + " " + abbr + "\n\nClick OK to continue.")){
+            // console.log(timeSingle);
+            // chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
+            chrome.runtime.sendMessage({prefix: timeSingle, message:'delete'});
+            $.datepicker._clearDate("#datepicker2");
+            dialog2.dialog( "close" );
+          }
+        } else {  
+          if (spanish) updateTips("#validateTips2",valid_time_msg_spanish);
+          else updateTips("#validateTips2",valid_time_msg);
         }
       } else {  
-        updateTips("#validateTips2","Please select a valid time frame.")
+        if (spanish) updateTips("#validateTips2",valid_time_msg_spanish);
+        else updateTips("#validateTips2",valid_time_msg);
       }
-    } else {  
-      updateTips("#validateTips2","Please select a valid time frame.")
-    }
+    });
   }
 
   // Config by Time initialization
   function launchTime() {
-    $("#timezone2").val("America/New_York");
-    $("#validateTips2").text("Select a time frame to delete history and the time zone you were in. ");
-    $( "#datepicker2" ).datepicker({
-          showOtherMonths: true,
-          selectOtherMonths: true,
-          minDate: -6, maxDate: 0
-        }).blur(); 
-    $('#singleTime').prop('disabled', false);
-    $("#startTime").prop('disabled', false);
-    $("#endTime").prop('disabled', false);
-    $("#startTime").val('');
-    $("#endTime").val('');
-    $("#singleTime").val('');
-    
+    getSyncStorageValue('spanish').then(function(temp){
+      spanish = temp.spanish;
+      region = spanish ? "es" : "en"
 
-    $("#startTime").change(function() {
-      $("#endTime option").removeAttr('disabled');
-      var value = $("#startTime option:selected").val();
-      if (value === '') return;
-      for (var i = 0; i <= value; i++){
-        $("#endTime option[value="+ i +"]").attr('disabled','disabled');
-      }
-      $('#singleTime').prop('disabled', true);
-    });
+      $("#timezone2").val("America/New_York");
 
-    $("#singleTime").change(function() {
-      $('#endTime').prop('disabled', true);
-      $('#startTime').prop('disabled',true);
+      if (spanish) $("#validateTips2").text(select_time_msg_spanish);
+      else $("#validateTips2").text(select_time_msg);
+      $( "#datepicker2" ).datepicker({
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            minDate: -6, maxDate: 0
+          },$.datepicker.regional[ region ]).blur(); 
+      $('#singleTime').prop('disabled', false);
+      $("#startTime").prop('disabled', false);
+      $("#endTime").prop('disabled', false);
+      $("#startTime").val('');
+      $("#endTime").val('');
+      $("#singleTime").val('');
+      
+
+      $("#startTime").change(function() {
+        $("#endTime option").removeAttr('disabled');
+        var value = $("#startTime option:selected").val();
+        if (value === '') return;
+        for (var i = 0; i <= value; i++){
+          $("#endTime option[value="+ i +"]").attr('disabled','disabled');
+        }
+        $('#singleTime').prop('disabled', true);
+      });
+
+      $("#singleTime").change(function() {
+        $('#endTime').prop('disabled', true);
+        $('#startTime').prop('disabled',true);
+      });
+      $("#timezone2").select2();
     });
-    $("#timezone2").select2();
   }
 
   // Dialog window config 
@@ -529,12 +755,17 @@ $( function() {
   // Initialize Help
   $("#btHelp").button().removeClass();
   $("#btHelp").button().on("click", function(){
-    alert("To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor any further questions, please contact us at nyu-smapp-engineers@nyu.edu");
+    chrome.storage.sync.get("spanish", function(temp){
+      spanish = temp.spanish;
+      if (spanish) alert(help_msg_spanish);
+      else alert(help_msg);
+    })
+    
   }); 
 
 });
 
-// Disalbe extension after three attempts
+// Disable extension after three attempts
 getSyncStorageValue("isDeactivated").then(function(temp) {
   // console.log("what is isDeactivated: ", isDeactivated);
   if (temp.isDeactivated !== undefined) {
@@ -559,6 +790,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelector('#btSubmit').addEventListener('click', setUserID);
     document.querySelector('#btAdd').addEventListener('click', addElement);
     document.querySelector('#cbPause').addEventListener('change', pauseExtension);
-    writeList();
+    document.querySelector('#btLg').addEventListener('click',changeLanguage)
+    writeContent(false);
   });
 });

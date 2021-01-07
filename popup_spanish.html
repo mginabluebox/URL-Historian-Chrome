@@ -7,10 +7,12 @@
     <link rel="stylesheet" href="style.css">    
     <script src="jquery/jquery-3.5.1.min.js"></script>
     <script src="jquery/jquery-ui.min.js"></script>
+    <script src="jquery/datepicker-es.js"></script>
     <script src="tz/moment.min.js"></script>
     <script src="tz/moment-timezone-with-data.min.js"></script>
     <script src="tz/select2.min.js"></script>
     <script src="popup.js"></script>
+
   </head>
 
   <body>
@@ -28,18 +30,18 @@
       <div class="a">
         <form>
           <div>
-              <label for="userID" class="mainlb" id="userIDlb">User ID</label>
+              <label for="userID" class="mainlb" id="userIDlb">User ID (S)</label>
               <input type="text" id="userID" placeholder="Enter User ID" maxlength="20" class="mainInput">
-              <button type="submit" id="btSubmit">Submit</button>
+              <button type="submit" id="btSubmit">Submit (S)</button>
           </div>
         </form>
       </div>
 
     <!-- Delete Browse History Field -->
       <div id="deleteHistory" class="f">
-        <label for="deleteHistory" class="mainlb" id="deleteHistorylb">Delete browse history</label>
-        <button id="btDeleteDate" class="btDeleteDate">by Date</button>
-        <button id="btDeleteTime" class="btDeleteTime">by Time</button>
+        <label for="deleteHistory" class="mainlb" id="deleteHistorylb">Delete browse history (S)</label>
+        <button id="btDeleteDate" class="btDeleteDate">by Date (S)</button>
+        <button id="btDeleteTime" class="btDeleteTime">by Time (S)</button>
       </div>
 
       <!-- Delete by Date Dialog -->
@@ -68,10 +70,10 @@
             <input type="text" id="datepicker2" tabindex="-1" readonly="readonly" size="15">
           </fieldset>
           <fieldset>
-            <p style="line-height: 2px">Then, select an hour range...</p>
-            <label for="startTime">StartTime: </label>
+            <p style="line-height: 2px">Then, select an hour range... (S)</p>
+            <label for="startTime">StartTime: (S)</label>
             <select id="startTime"> 
-              <option value = ''> --Select-- </option>
+              <option value = ''> --Select-- (S)</option>
               <option value = '0'> 12:00am </option>
               <option value = '1'> 1:00am </option>
               <option value = "2"> 2:00am </option>
@@ -126,10 +128,10 @@
               <option value = "23"> 11:00pm </option>
             </select>
             <p><p style="font-weight:bold; display: inline">...OR</p> a single hour.<br></p>
-            <label for="singleTime">Time: </label>
+            <label for="singleTime">Time: (S)</label>
             <!-- <input type="text" id="singleTime" size="15"> -->
             <select id="singleTime"> 
-              <option value = ''> --Select-- </option>
+              <option value = ''> --Select-- (S)</option>
               <option value = '0'> 12:00am </option>
               <option value = '1'> 1:00am </option>
               <option value = "2"> 2:00am </option>
@@ -161,25 +163,25 @@
       
       <!-- Blacklist Input and Display Field -->
       <div id="blacklist" class="c">
-        <label class="mainlb" id="blacklistlb">Blacklist a website</label>
+        <label class="mainlb" id="blacklistlb">Blacklist a website (S)</label>
         <input type="blacklist" id="userInput" placeholder="www.siteDomain.com"></input>
-        <button id="btAdd">Add</button>
+        <button id="btAdd">Add (S)</button>
       </div>
 
       <div class="d">
-        <label for="currBlacklist" class="mainlb" id="cbllb">Current Blacklisted Websites</label>
+        <label for="currBlacklist" class="mainlb" id="cbllb">Current Blacklisted Websites (S)</label>
         <ul id="currBlacklist">
-          <li>www.example.com</li>
+          <li>www.example.com (S)</li>
         </ul>
       </div>
 
 
       <div class="e">
         <img id="csmap-icon" src="icon128.png" height="45px" width="auto">
-        <h3 class="img-title" id="titlelb">URL Historian </h3>
+        <h3 class="img-title" id="titlelb">URL Historian (S)</h3>
         <!-- Help button-->
-        <button id="btHelp">Help<span class="ui-icon ui-icon-help"></span></button>
-        <button id="btLg">Español<span class="ui-icon ui-icon-transferthick-e-w"></button>
+        <button id="btHelp">Help (S)<span class="ui-icon ui-icon-help"></span></button>
+        <button id="btLg">English<span class="ui-icon ui-icon-transferthick-e-w"></button>
       </div>
 
     </div>

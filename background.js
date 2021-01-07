@@ -13,9 +13,18 @@ valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now
 msg_retry = "Unfortunately, the User ID you entered cannot be verified.\n\nPlease enter the ID provided in your survey. If you need help to recover your User ID, please contact us at nyu-smapp-engineers@nyu.edu for assistance."
 msg_final = "Thank you for your interest in URL Historian.\n\nUnfortunately, multiple attempts to verify the User ID entered have failed.\n\nIf you are a recruited participant, please contact nyu-smapp-engineers@nyu.edu for assistance.\n\nIf you are not a recruited participant and would like to contribute to a CSMaP study, feel free to contact us at the email above. \n\nURL Historian is now disabled. Please uninstall it from your browser."
 
+valid_msg_spanish = "¡Gracias por contribuir a nuestra investigación!\n\nURL Historian ahora está activo en tu navegador web. \n\nSi tienes más pregundas: \nPara dudas técnicas respecto a la extensión, por favor contactar a nyu-smapp-engineers@nyu.edu \nPara preguntas respecto a la información que recolectamos y cómo usamos tu información en los proyectos de investigación, por favor contacta a csmap-surveys@nyu.edu"
+msg_retry_spanish = "Desafortunadamente, el ID de Usuario que introdujiste no pudo ser verificado.\n\nPor favor introduce el ID que se te suministró en tu encuesta. Si necesitas ayuda para recuperar tu ID de Usuario, por favor contáctanos en nyu-smapp-engineers@nyu.edu para recibir asistencia."
+msg_final_spanish = "Gracias por tu interés en URL Historian.\n\nDesafortunadamente, múltiples intentos para verificar el ID de Usuario que introdujiste han fallado.\n\nSi eres un participante reclutado, por favor contacta a nyu-smapp-engineers@nyu.edu para asistencia.\n\nSi no eres un participante reclutado y te gustaría contribuir a este estudio de CSMaP, siéntete libre de contactarnos en el anterior correo electrónico. \n\nURL Historian está ahora desactivado. Por favor desinstálalo de tu navegador web."
+
+
 function setMsgAlert(pausedMins){
-  msg_alert = `URL Historian has been paused for ${pausedMins} minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!`
-  return msg_alert;
+  chrome.storage.sync.get("spanish", function(temp){
+    msg_alert = `URL Historian has been paused for ${pausedMins} minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!`
+    msg_alert_spanish = `Spanish msg alert`
+    if (temp.spanish) alert(msg_alert_spanish);
+    else alert(msg_alert);
+  });
 }
 
 function containsObjectNew(obj, list) {
@@ -35,7 +44,12 @@ function containsObjectNew(obj, list) {
       // console.log("Verified User ID:", obj);
       chrome.storage.sync.set({userID: obj, isPaused: false});
       chrome.browserAction.setIcon({path: "icon128.png"});
-      alert(valid_msg);
+      chrome.storage.sync.get('spanish',function(temp){
+        spanish = temp.spanish;
+        if (spanish) alert(valid_msg_spanish);
+        else alert(valid_msg);
+      })
+      
       resolve(true);
     }
     resolve(false);
@@ -232,11 +246,14 @@ chrome.runtime.onInstalled.addListener(function(details) {
   // loadConfigFIRST();
   var reason = details.reason;
   if (reason === "install") {
-    chrome.storage.sync.set({isPaused: true, pausedMins: 60, attempt: 10});
+    chrome.storage.sync.set({isPaused: true, pausedMins: 60, attempt: 10, spanish:false});
     chrome.browserAction.setIcon({path: "icon_disabled.png"}); 
   } 
   else if (reason === 'update') {
-    chrome.storage.sync.get(['isPaused'], function(temp) {
+    // alert('updated')
+    chrome.storage.sync.get(['isPaused','spanish'], function(temp) {
+      if(temp.spanish) chrome.browserAction.setPopup({popup:"popup_spanish.html"});
+      else chrome.browserAction.setPopup({popup:"popup.html"});
       if(temp.isPaused) {
         chrome.browserAction.setIcon({path: "icon_disabled.png"});
         chrome.storage.sync.set({pausedMins:60, attempt:10});
@@ -249,9 +266,10 @@ chrome.runtime.onInstalled.addListener(function(details) {
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.message == "setUserId") { 
     //VERIFY USER CREDENTIALS    
-    chrome.storage.sync.get(['validate','attempt'], function(temp){
+    chrome.storage.sync.get(['validate','attempt','spanish'], function(temp){
       var validate = temp.validate;
       var attempt = temp.attempt;
+      spanish = temp.spanish;
       containsObjectNew(request.userID, validate).then(function(value) {
         if (value === true) {
           chrome.tabs.create({url: landingPage});
@@ -260,10 +278,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         else {
           attempt --;
           if(attempt > 0) {
-            alert(msg_retry + '\n\nYou have ' + attempt + " attempts left.");
+            if (spanish) alert(msg_retry_spanish + '\n\nYou have ' + attempt + " attempts left. (S)");
+            else alert(msg_retry + '\n\nYou have ' + attempt + " attempts left.");
             chrome.storage.sync.set({'attempt': attempt});
           } else { 
-            alert(msg_final);
+            if (spanish) alert(msg_final_spanish);
+            else alert(msg_final);
             chrome.storage.sync.set({isDeactivated:true});
           }  
         }
@@ -278,7 +298,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 // LISTEN TO TAB CHANGES 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  // Do nothign if URL hasn't changed
+  // Do nothing if URL hasn't changed
   if (!changeInfo.url) return;
   // ENSURE USER HAS USED A VALID ID   
   chrome.storage.sync.get(['userID', 'isPaused','blacklist'], function(temp) {
@@ -323,7 +343,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 chrome.alarms.onAlarm.addListener(function(alarm) {
   chrome.storage.sync.get("pausedMins",function(temp){
     pausedMins = temp.pausedMins;
-    alert(setMsgAlert(pausedMins));
+    setMsgAlert(pausedMins);
     pausedMins += 360;
     chrome.storage.sync.set({"pausedMins": pausedMins});
   });
