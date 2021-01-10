@@ -11,7 +11,7 @@
   },
   "background": {
     "scripts": ["jquery/jquery-3.5.1.min.js","jquery/jquery-ui.min.js",
-                "tz/moment.min.js","tz/moment-timezone-with-data.min.js",
+                "tz/moment-with-locales.min.js","tz/moment-timezone-with-data.min.js",
                 "tz/select2.min.js",
                 "aws-sdk.min.js","background.js"],
     "persistent": false

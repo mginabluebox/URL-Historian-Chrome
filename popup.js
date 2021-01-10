@@ -130,8 +130,8 @@ function writeContent(changeLg){
     ph_text = 'Enter User ID';
     ph_text_spanish = 'Enter User ID (S)'
     // set placeholder for user id
-    var id = temp.userID;
-    if (id === undefined || id === 'undefined') {
+    var id = "" + temp.userID;
+    if (id === 'undefined') {
       var pl = document.getElementById("userID").placeholder = isSpanish ? ph_text_spanish : ph_text;
     } else {
       var pl = document.getElementById("userID").placeholder = id;
@@ -293,7 +293,7 @@ $( function() {
       }, 300 );
   }
 
-  // Format user selections into S3 folder paths for data deletion
+  // Format user selections into timestamps for data deletion
   // Return an array of ID/yyyy/mm/dd or an array of ID/yyyy/mm/dd/hh
   function formatDateTime(currID, date, timezone, starttime=null, endtime=null) {
     var startTime;
@@ -302,7 +302,7 @@ $( function() {
     currID = currID.toString();
     if (starttime !== '' && endtime == '') { // by single hour
       starttime = (starttime<10) ? " 0"+starttime+":00" : " "+starttime+":00";
-      startTime = moment.tz(day+starttime, timezone).valueOf();
+      startTime = moment.tz(day+starttime, timezone).valueOf(); // return timestamp according to input time zone
       // console.log([[currID, startTime.format("YYYY/MM/DD/HH")].join('/')]);
       return [currID, startTime, startTime + (60*60*1000)];
     } else if (starttime == '' && endtime == '') { // by date
@@ -554,18 +554,36 @@ $( function() {
 
 // <---- Delete history by date ---->
   // Format date time for confirmation window
-  function formatPrintDateTime(date,time=null) {
+  function formatPrintDateTime(date,spanish,time=null) {
     if (time === null) {
-      return moment(date.toISOString().slice(0,10)).format("LL");
+      if (spanish) {
+        formattedDate = moment(date.toISOString().slice(0,10));
+        formattedDate.locale('es');
+        return formattedDate.format("LL");
+        // var local = moment(date.toISOString().slice(0,10));
+        // moment.locale('es');
+        // local.locale(false);
+        // return local.format('LL');
+      } else return moment(date.toISOString().slice(0,10)).format("LL");
+    } else {
+      if (spanish) {
+        formattedTime = moment(date.toISOString().slice(0,10) + ((time<10) ? " 0"+time+":00" : " "+ time+":00"));
+        formattedTime.locale('es');
+        return formattedTime.format('LLL');
+        // var local = moment(date.toISOString().slice(0,10) + ((time<10) ? " 0"+time+":00" : " "+ time+":00"));
+        // moment.locale('es');
+        // local.locale(false);
+        // return local.format('LLL');
+        // return moment(date.toISOString().slice(0,10) + ((time<10) ? " 0"+time+":00" : " "+ time+":00")).locale('es').format('LLL');
+      } else return moment(date.toISOString().slice(0,10) + ((time<10) ? " 0"+time+":00" : " "+ time+":00")).format("LLL");
     }
-   return moment(date.toISOString().slice(0,10) + ((time<10) ? " 0"+time+":00" : " "+ time+":00")).format("LLL");
   }
   // Get date selected by user
   async function getDateforByDate(values) {
     getSyncStorageValue(['spanish','userID']).then(function(temp){
       var spanish = temp.spanish;
       var date = $("#datepicker1").datepicker("getDate");
-      var currID = temp.userID;
+      var currID = ""+temp.userID;
       var timezone = $("#timezone1").val();
       // ENSURE USER IS LOGGED IN
       if (currID === 'undefined') {
@@ -574,8 +592,9 @@ $( function() {
       } 
       else if (date !== null && date instanceof Date && timezone !== '') {
         var formattedDate = formatDateTime(currID, date, timezone, starttime='',endtime='');
+        // var abbr = formatPrintDateTime(date,true).zone(timezone).abbr(date.getTime());
         var abbr = moment.tz.zone(timezone).abbr(date.getTime());
-        var printDate = formatPrintDateTime(date);
+        var printDate = spanish ? formatPrintDateTime(date,true) : formatPrintDateTime(date,false)
         // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
         if(spanish ? confirm("spanish delete confim") : confirm("You are about to delete all history on:\n\n\t" + printDate+ " " + abbr + "\n\nClick OK to continue.")){
           // console.log(formattedDate[0]);
@@ -612,14 +631,19 @@ $( function() {
   $( "#btDeleteDate" ).button().on("click", function() {
     getSyncStorageValue('spanish').then(function(temp){
       spanish = temp.spanish;
+      region = spanish ? "es" : "en"
+
       if (spanish) $("#validateTips1").text(select_date_msg_spanish);
       else $("#validateTips1").text(select_date_msg);
+
       dialog1.dialog('open');
+
       $( "#datepicker1" ).datepicker({
         showOtherMonths: true,
         selectOtherMonths:true,
         minDate: -6, maxDate: 0
       },$.datepicker.regional[ region ]).blur(); 
+
       $("#timezone1").val("America/New_York");
       $("#timezone1").select2();
     });
@@ -634,7 +658,7 @@ $( function() {
       var startTime = $("#startTime").val(); 
       var endTime = $("#endTime").val(); 
       var singleTime = $("#singleTime").val();
-      var currID = temp.userID;
+      var currID = "" + temp.userID;
       var timezone = $("#timezone2").val();
       // ENSURE USER IS LOGGED IN 
       if (currID === 'undefined') {
@@ -645,12 +669,13 @@ $( function() {
         // DELETE BY HOUR RANGE
         if (startTime !== '' && endTime !== '' && parseInt(startTime) <= parseInt(endTime)) {
           var formattedTime = formatDateTime(currID, date, timezone, starttime=startTime, endtime=endTime);
-          var printST = formatPrintDateTime(date, startTime);
-          var printET = formatPrintDateTime(date, endTime);
+          var printST = spanish ? formatPrintDateTime(date, true, startTime) : formatPrintDateTime(date, false, startTime)
+          var printET = spanish ? formatPrintDateTime(date, true, endTime) : formatPrintDateTime(date, false, endTime)
+          // var abbr = formatPrintDateTime(date,true, startTime).zone(timezone).abbr(date.getTime());
           var abbr = moment.tz.zone(timezone).abbr(date.getTime());
-
+          var timezoneSpanish = i18n_spanish[timezone];
           // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-          if(spanish ? confirm("Estas apunto de borrar tu historial de navegación (inclusive):\n\n\tdesde: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nHaz click en OK para continuar.") : confirm("You are about to delete history in the following time frame (inclusive):\n\n\tfrom: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nClick OK to continue.")){
+          if(spanish ? confirm("Estas apunto de borrar tu historial de navegación (inclusive):\n\n\t(" + timezoneSpanish + ")\n\tdesde: " + printST + "\n\tto: " + printET + "\n\nHaz click en OK para continuar.") : confirm("You are about to delete history in the following time frame (inclusive):\n\n\tfrom: " + printST + " " + abbr +"\n\tto: " + printET + " " + abbr +"\n\nClick OK to continue.")){
             // console.log(timeRange);
             chrome.runtime.sendMessage({prefix: formattedTime, message:'delete'});
             $.datepicker._clearDate("#datepicker2");
@@ -659,12 +684,12 @@ $( function() {
         // DELETE BY SINGLE HOUR
         } else if (singleTime !== '') {
           var timeSingle = formatDateTime(currID, date, timezone, starttime=singleTime, endTime = '');
-
-          var printST = formatPrintDateTime(date,singleTime);
+          var printST = spanish ? formatPrintDateTime(date,true, singleTime) : formatPrintDateTime(date,false, singleTime)
+          // var abbr = formatPrintDateTime(date,true, singleTime).zone(timezone).abbr(date.getTime());
           var abbr = moment.tz.zone(timezone).abbr(date.getTime());
+          var timezoneSpanish = i18n_spanish[timezone]
           // POP A CONFIRMATION WINDOW TO PREVENT USER ERRORS
-          if(spanish ?  confirm("Estas apunto de borrar tu historial de navegación de la siguiente hora: \n\n\t" + printST + " " + abbr + "\n\nHaz click en OK para continuar.") : confirm("You are about to delete history of the following hour: \n\n\t" + printST + " " + abbr + "\n\nClick OK to continue.")){
-            // console.log(timeSingle);
+          if(spanish ?  confirm("Estas apunto de borrar tu historial de navegación de la siguiente hora: \n\n\t("+ timezoneSpanish +")\n\t" + printST + "\n\nHaz click en OK para continuar.") : confirm("You are about to delete history of the following hour: \n\n\t" + printST + " " + abbr + "\n\nClick OK to continue.")){
             // chrome.runtime.sendMessage({delbyTime : timeSingle, message:'delbyTime'});
             chrome.runtime.sendMessage({prefix: timeSingle, message:'delete'});
             $.datepicker._clearDate("#datepicker2");
@@ -726,7 +751,7 @@ $( function() {
   dialog2 = $( "#deleteByTimeForm" ).dialog({
       autoOpen: false,
       height: 280,
-      width: 330,
+      width: 350,
       modal: true,
       buttons: [
         {text: "Delete",
