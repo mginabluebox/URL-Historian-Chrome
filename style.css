@@ -105,6 +105,7 @@ h3 {
   row-gap: 2px;
 }
 
+/*User ID input field*/
 .a {
   grid-area: 2 / 2  / span 1 / span 2;
 }
@@ -113,17 +114,19 @@ h3 {
   grid-area: 2 / 1 / span 1 / span 1;
 }
 
+/*Blacklist input field*/
 .c {
   grid-area: 4 / 1  / span 1 / span 3;
   display:inline-grid;
   grid-template-columns: 1fr auto auto;
   min-height: 0;
 }
-
+/*Current blacklisted site field*/
 .d {
   grid-area: 5 / 1  / span 1 / span 3;
 }
 
+/*Title, language and help buttons field*/
 .e {
   grid-area: 1 / 1 / span 1 / span 3;
   line-height: 10px;
@@ -133,10 +136,12 @@ h3 {
   background-color: snow;
 }
 
+/*Delete browse history*/
 .f {
   grid-area: 3 / 1 / span 1 / span 3;
 }
 
+/*Delete dialogs*/
 .g input {
   border-radius: 1px;
   border: 2px double #008081;
@@ -175,7 +180,7 @@ h3 {
 }
 
 .js-Selector {
-  width: 79%;
+  width: 70%;
 }
 
 .select2-results .select2-results__options{
@@ -300,7 +305,7 @@ button:disabled, button:disabled:hover {
 }
 
 .d li {
-  margin: -5px -30px;
+  margin: 0px -30px;
 }
 
 .remove {

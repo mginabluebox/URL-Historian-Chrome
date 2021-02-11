@@ -30,50 +30,50 @@
       <div class="a">
         <form>
           <div>
-              <label for="userID" class="mainlb" id="userIDlb">User ID (S)</label>
+              <label for="userID" class="mainlb" id="userIDlb" style="font-size:16px">ID de Usuario</label>
               <input type="text" id="userID" placeholder="Enter User ID" maxlength="20" class="mainInput">
-              <button type="submit" id="btSubmit">Submit (S)</button>
+              <button type="submit" id="btSubmit">Enviar</button>
           </div>
         </form>
       </div>
 
     <!-- Delete Browse History Field -->
       <div id="deleteHistory" class="f">
-        <label for="deleteHistory" class="mainlb" id="deleteHistorylb">Delete browse history (S)</label>
-        <button id="btDeleteDate" class="btDeleteDate">by Date (S)</button>
-        <button id="btDeleteTime" class="btDeleteTime">by Time (S)</button>
+        <label for="deleteHistory" class="mainlb" id="deleteHistorylb" style="font-size:16px">Eliminar historial de navegación</label>
+        <button id="btDeleteDate" class="btDeleteDate">por Fecha</button>
+        <button id="btDeleteTime" class="btDeleteTime">por Hora</button>
       </div>
 
       <!-- Delete by Date Dialog -->
-      <div id="deleteByDateForm" title="Delete History by Date" class="g init-hidden">
+      <div id="deleteByDateForm" title="Eliminar historial por Fecha" class="g init-hidden">
         <p id="validateTips1" class="validateTips"> </p>
         <form>
           <fieldset style="padding-top:0.3em; padding-bottom:0.3em; line-height:30px">
-            <label for="timezone1">TimeZone: </label>
+            <label for="timezone1">Huso Horario: </label>
             <select id="timezone1" class="js-Selector"></select>
             <br>             
-            <label for="datepicker1">Date: </label>
+            <label for="datepicker1">Fecha: </label>
             <input type="text" id="datepicker1" tabindex="-1" readonly="readonly" size="15">
           </fieldset>
         </form>
       </div>
 
       <!-- Delete by Time Dialog -->
-      <div id="deleteByTimeForm" title="Delete History by Time" class="g init-hidden">
+      <div id="deleteByTimeForm" title="Eliminar historial por hora" class="g init-hidden">
         <p id="validateTips2" class="validateTips"> </p>
-        <label for="timezone2">TimeZone: </label>
+        <label for="timezone2">Huso Horario: </label>
         <select id="timezone2" class="js-Selector"></select>
         <form>   
           <fieldset>
-            <p style="line-height: 2px">First, select a date.</p>
-            <label for="datepicker2">Date: </label>
+            <p style="line-height: 2px">Primero, seleccione una fecha.</p>
+            <label for="datepicker2">Fecha: </label>
             <input type="text" id="datepicker2" tabindex="-1" readonly="readonly" size="15">
           </fieldset>
           <fieldset>
-            <p style="line-height: 2px">Then, select an hour range... (S)</p>
-            <label for="startTime">StartTime: (S)</label>
+            <p style="line-height: 2px">Luego, selecciona un rango de horas...</p>
+            <label for="startTime">Hora de Inicio:</label>
             <select id="startTime"> 
-              <option value = ''> --Select-- (S)</option>
+              <option value = ''> --Seleccionar--</option>
               <option value = '0'> 12:00am </option>
               <option value = '1'> 1:00am </option>
               <option value = "2"> 2:00am </option>
@@ -99,9 +99,9 @@
               <option value = "22"> 10:00pm </option>
               <option value = "23"> 11:00pm </option>
             </select>
-            <label for="endTime"><br>EndTime: </label>
+            <label for="endTime"><br>Hora de Fin: </label>
             <select id="endTime"> 
-              <option value = ''> --Select-- </option>
+              <option value = ''> --Seleccionar-- </option>
               <option value = '0'> 12:00am </option>
               <option value = '1'> 1:00am </option>
               <option value = "2"> 2:00am </option>
@@ -127,11 +127,11 @@
               <option value = "22"> 10:00pm </option>
               <option value = "23"> 11:00pm </option>
             </select>
-            <p><p style="font-weight:bold; display: inline">...OR</p> a single hour.<br></p>
-            <label for="singleTime">Time: (S)</label>
+            <p><p style="font-weight:bold; display: inline">...O</p> una sola hora.<br></p>
+            <label for="singleTime">Hora: </label>
             <!-- <input type="text" id="singleTime" size="15"> -->
             <select id="singleTime"> 
-              <option value = ''> --Select-- (S)</option>
+              <option value = ''> --Seleccionar-- </option>
               <option value = '0'> 12:00am </option>
               <option value = '1'> 1:00am </option>
               <option value = "2"> 2:00am </option>
@@ -163,24 +163,24 @@
       
       <!-- Blacklist Input and Display Field -->
       <div id="blacklist" class="c">
-        <label class="mainlb" id="blacklistlb">Blacklist a website (S)</label>
-        <input type="blacklist" id="userInput" placeholder="www.siteDomain.com"></input>
-        <button id="btAdd">Add (S)</button>
+        <label class="mainlb" id="blacklistlb" style="font-size:16px">Agregar sitio web a la lista negra</label>
+        <input type="blacklist" id="userInput" placeholder="www.dominio-del-sitio.com"></input>
+        <button id="btAdd">Agregar</button>
       </div>
 
       <div class="d">
-        <label for="currBlacklist" class="mainlb" id="cbllb">Current Blacklisted Websites (S)</label>
+        <label for="currBlacklist" class="mainlb" id="cbllb">Páginas web actualmente en la lista negra</label>
         <ul id="currBlacklist">
-          <li>www.example.com (S)</li>
+          <li>www.ejemplo.com</li>
         </ul>
       </div>
 
 
       <div class="e">
         <img id="csmap-icon" src="icon128.png" height="45px" width="auto">
-        <h3 class="img-title" id="titlelb">URL Historian (S)</h3>
+        <h3 class="img-title" id="titlelb">Historiador de URL</h3>
         <!-- Help button-->
-        <button id="btHelp">Help (S)<span class="ui-icon ui-icon-help"></span></button>
+        <button id="btHelp">Ayuda<span class="ui-icon ui-icon-help"></span></button>
         <button id="btLg">English<span class="ui-icon ui-icon-transferthick-e-w"></button>
       </div>
 

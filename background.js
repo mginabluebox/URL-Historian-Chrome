@@ -21,7 +21,7 @@ msg_final_spanish = "Gracias por tu interés en URL Historian.\n\nDesafortunadam
 function setMsgAlert(pausedMins){
   chrome.storage.sync.get("spanish", function(temp){
     msg_alert = `URL Historian has been paused for ${pausedMins} minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!`
-    msg_alert_spanish = `Spanish msg alert`
+    msg_alert_spanish = `URL Historian ha sido pausado por ${pausedMins} minutos.\nPor favor reactívalo a tu conveniencia. \n\n(Para reactivar: haz clic en el ícono para abrir URL Historian y desliza el botón a la derecha.)\n\n¡Gracias por contribuir a nuestra investigación!`
     if (temp.spanish) alert(msg_alert_spanish);
     else alert(msg_alert);
   });
@@ -246,7 +246,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
   // loadConfigFIRST();
   var reason = details.reason;
   if (reason === "install") {
-    chrome.storage.sync.set({isPaused: true, pausedMins: 60, attempt: 10, spanish:false});
+    chrome.storage.sync.set({isPaused: true, pausedMins: 60, attempt: 10, spanish:false, isDeactivated:false});
     chrome.browserAction.setIcon({path: "icon_disabled.png"}); 
   } 
   else if (reason === 'update') {
@@ -278,7 +278,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         else {
           attempt --;
           if(attempt > 0) {
-            if (spanish) alert(msg_retry_spanish + '\n\nYou have ' + attempt + " attempts left. (S)");
+            if (spanish) alert(msg_retry_spanish + '\n\nTienes ' + attempt + " intentos restantes.");
             else alert(msg_retry + '\n\nYou have ' + attempt + " attempts left.");
             chrome.storage.sync.set({'attempt': attempt});
           } else { 
