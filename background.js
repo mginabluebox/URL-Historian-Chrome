@@ -1,14 +1,12 @@
-/* globals chrome, document */
-// console.log('Welcome to URL Historian');
-
-//Temporary variables
-//List of params in storage: userID, validate, attempt, isDeactivated, paused, pausedMins, blacklist
+// -----------Temporary Variables------------ //
+// PARAMS IN CHROME SYNC STORAGE: userID, validate, attempt, isDeactivated, paused, pausedMins, blacklist, spanish
 var resource; //temp
 var pause; //temp
 var date; //local
 var landingPage = "https://csmapnyu.org/2020/08/25/csmap-independent-panel-thank-you/";
+var landingPageSpanish = "https://csmapnyu.org/2020/08/25/csmap-independent-panel-thank-you/";
 
-//MESSAGES 
+// MESSAGES 
 valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now active on your browser. You can always click \"Help\" for instructions on how to use our extension. \n\nIf you have any further questions: \nFor technical inquiries regarding the extension, please contact nyu-smapp-engineers@nyu.edu \nFor questions about the data we collect and how your data is used in research projects, please contact csmap-surveys@nyu.edu"
 msg_retry = "Unfortunately, the User ID you entered cannot be verified.\n\nPlease enter the ID provided in your survey. If you need help to recover your User ID, please contact us at nyu-smapp-engineers@nyu.edu for assistance."
 msg_final = "Thank you for your interest in URL Historian.\n\nUnfortunately, multiple attempts to verify the User ID entered have failed.\n\nIf you are a recruited participant, please contact nyu-smapp-engineers@nyu.edu for assistance.\n\nIf you are not a recruited participant and would like to contribute to a CSMaP study, feel free to contact us at the email above. \n\nURL Historian is now disabled. Please uninstall it from your browser."
@@ -17,7 +15,8 @@ valid_msg_spanish = "¡Gracias por contribuir a nuestra investigación!\n\nURL H
 msg_retry_spanish = "Desafortunadamente, el ID de Usuario que introdujiste no pudo ser verificado.\n\nPor favor introduce el ID que se te suministró en tu encuesta. Si necesitas ayuda para recuperar tu ID de Usuario, por favor contáctanos en nyu-smapp-engineers@nyu.edu para recibir asistencia."
 msg_final_spanish = "Gracias por tu interés en URL Historian.\n\nDesafortunadamente, múltiples intentos para verificar el ID de Usuario que introdujiste han fallado.\n\nSi eres un participante reclutado, por favor contacta a nyu-smapp-engineers@nyu.edu para asistencia.\n\nSi no eres un participante reclutado y te gustaría contribuir a este estudio de CSMaP, siéntete libre de contactarnos en el anterior correo electrónico. \n\nURL Historian está ahora desactivado. Por favor desinstálalo de tu navegador web."
 
-
+// -----------Functions------------ //
+// CONFIGURE ALERT FOR PAUSING TOO LONG
 function setMsgAlert(pausedMins){
   chrome.storage.sync.get("spanish", function(temp){
     msg_alert = `URL Historian has been paused for ${pausedMins} minutes.\nPlease re-activate at your convenience. \n\n(To re-activate: click on the icon to open URL Historian, and slide the button to the right.)\n\nThank you for contributing to our research!`
@@ -27,6 +26,7 @@ function setMsgAlert(pausedMins){
   });
 }
 
+// VALIDATE USER ID
 function containsObjectNew(obj, list) {
   return new Promise(function(resolve) {
     // var i;
@@ -55,7 +55,7 @@ function containsObjectNew(obj, list) {
     resolve(false);
   });
 }
-
+// 
 // SET CONFIGURATION PARAMETERS XML ver
 // function loadConfig(xhr) {
 //   // grab object
@@ -117,6 +117,7 @@ function containsObjectNew(obj, list) {
 //   })
 // }
 
+// LOAD AWS CONFIGURATION AND FETCH API
 async function loadConfig() {
   let response = await fetch(chrome.runtime.getURL("/config.json"))
   let config = await response.json();
@@ -184,7 +185,7 @@ async function deleteObjects(prefix) {
       ':ui' : {'S': prefix[0]}
     }
   }
-
+  // QUERY ALL MATCHING RECORDS
   var paramList = [];
   resource.query(qparam, function(err,data) {
     // if (err) {console.log(err);} // for debug
@@ -209,7 +210,7 @@ async function deleteObjects(prefix) {
       // SLICE RECORDS INTO BATCHES OF 25 
       var batchParams = chunkArray(paramList, 25);
 
-      // DELETE RECORDS IF RECORD EXISTS
+      // DELETE RECORD IF RECORD EXISTS
       if (batchParams.length !== 0) {
         for (var i = 0; i < batchParams.length; i++) {
           var dparam = {
@@ -231,7 +232,7 @@ async function deleteObjects(prefix) {
   });
 }
 
-// -----------Listeners------------ //
+// -----------Chrome Listeners------------ //
 chrome.runtime.onStartup.addListener(function () {    
   // loadConfigFIRST();
   chrome.storage.sync.get(['isPaused'], function(temp) {
@@ -269,10 +270,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     chrome.storage.sync.get(['validate','attempt','spanish'], function(temp){
       var validate = temp.validate;
       var attempt = temp.attempt;
-      spanish = temp.spanish;
+      var spanish = temp.spanish;
       containsObjectNew(request.userID, validate).then(function(value) {
         if (value === true) {
-          chrome.tabs.create({url: landingPage});
+          if (spanish) chrome.tabs.create({url: landingPageSpanish});
+          else chrome.tabs.create({url: landingPage});
           chrome.storage.sync.set({isDeactivated:false});
         } 
         else {

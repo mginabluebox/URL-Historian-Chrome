@@ -1,7 +1,6 @@
-// global variables
-// alert and dialog messages
+// MESSAGES
 blt_msg = "Please enter website domain to add to the Blacklist!"; 
-msg = "Welcome to URL Historian. Please enter your User ID!"
+enter_user_id_msg = "Welcome to URL Historian. Please enter your User ID!"
 help_msg = "To pause activity\n\tSlide the option button to the left\nTo delete browse history\n\tby Date\n\t\t1. Click \"by Date\" button\n\t\t2. Select the time zone you were in\n\t\t3. Select a date to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date\n\tby Time\n\t\t1. Click \"by Time\" button\n\t\t2. Select the time zone you were in \n\t\t3. Select date and time frame to delete\n\t\t4. Click \"Delete\" button\n\t\t5. Confirm deletion date and time\nFor websites you wish to exclude\n\t1. Enter the domain in \"Blacklist a website\"\n\t2. Click \"Add\" button\nTo remove a website from current blacklist\n\tClick X next to the website\n\nFor any further questions, please contact us at nyu-smapp-engineers@nyu.edu"
 login_first_msg = "Please log in with your UserID first."
 select_date_msg = "Select a date on which you wish to delete history and the time zone you were in."
@@ -10,7 +9,7 @@ valid_date_msg = "Please select a valid date."
 valid_time_msg = "Please select a valid time frame."
 
 blt_msg_spanish = "¡Por favor introduce el dominio web que quieras agregar a la Lista Negra! (Blacklist)"
-msg_spanish = "Bienvenido al URL Historian. ¡Por favor entra tu ID de Usuario!"
+enter_user_id_msg_spanish = "Bienvenido al URL Historian. ¡Por favor entra tu ID de Usuario!"
 help_msg_spanish = "Para pausar la actividad\n\tDesliza el botón de opción hacia la izquierda\nPara eliminar tu historial de navegación\n\tpor Fecha\n\t\t1. Haz click en el botón \"por Fecha\"\n\t\t2. Selecciona el huso horario en el que estabas\n\t\t3. Selecciona una fecha para borrar\n\t\t4. Haz click en el botón \"Eliminar\" \n\t\t5. Confirma la fecha de borrado\n\tpor Hora\n\t\t1. Haz click en el botón \"por Hora\" \n\t\t2. Selecciona el huso horario en el que estabas \n\t\t3. Selecciona la fecha y rango de tiempo para eliminar\n\t\t4. Haz click en el botón \"Eliminar\" \n\t\t5. Confirma la fecha y hora de borrado\nPara páginas web que quieras excluir\n\t1. Introduce el dominio web en \"Agregar sitio web a la lista negra\"\n\t2. Haz click en el botón \"Agregar\"\nPara eliminar una página web de la lista negra actual\n\t haz click en la X junto a la página web\n\nPara más preguntas, por favor contáctanos en nyu-smapp-engineers@nyu.edu"
 login_first_msg_spanish = "Por favor primero ingresa con tu ID de Usuario."
 select_date_msg_spanish = "Selecciona una fecha para la cual quieres borrar tu historial y selecciona el huso horario en el que estabas."
@@ -18,22 +17,22 @@ select_time_msg_spanish = "Selecciona un rango de tiempo para el cual quieras bo
 valid_date_msg_spanish = "Por favor selecciona una fecha válida."
 valid_time_msg_spanish = "Por favor selecciona un rango de tiempo válido."
 
-var currID;
+// SEND USER ID TO background.js FOR VALIDATION
 function setUserID() {
-    var userInputID = "" + document.getElementById("userID").value;
+    var userInputID = document.getElementById("userID").value.toString().trim();
     chrome.storage.sync.get(['userID','spanish'], function(temp) {
       currID = "" + temp.userID; 
       // console.log(userInputID, currID);
       if (userInputID === '') { 
-        if (temp.spanish) alert(msg_spanish);
-        else alert(msg);
+        if (temp.spanish) alert(enter_user_id_msg_spanish);
+        else alert(enter_user_id_msg);
       } else if(!(userInputID === currID)) {
         chrome.runtime.sendMessage({userID: userInputID, message:"setUserId"});
       }
     });
 }
 
-//remove items from blacklist 
+// REMOVE ITEMS FROM THE BLACKLIST
 var remove = document.getElementsByClassName("remove");
 for (var i = 0; i < remove.length; i++) {
   remove[i].onclick = function() {
@@ -50,7 +49,7 @@ for (var i = 0; i < remove.length; i++) {
   }
 }
 
-//gets nonempty website name to add to blacklist
+// GET NONEMPTY WEBSITE NAME TO ADD TO BLACKLIST
 function addElement() {
   chrome.storage.sync.get('spanish', function(temp) {
     spanish = temp.spanish;
@@ -66,7 +65,7 @@ function addElement() {
   
 }
 
-//adds nonduplicate website name to blacklist
+// ADD NONDUPLICATE WEBSITE NAME TO BLACKLIST
 function addToBlacklist(str) {
   chrome.storage.sync.get({blacklist: []}, function(temp){
     var bl = temp.blacklist;
@@ -86,7 +85,7 @@ function addToBlacklist(str) {
   })
 }
 
-//creates a new list item for blacklist item and adds neccesary html
+// CREATES A LIST ITEM FOR BLACKLIST AND ADDS ALL EXISTING WEBISTES
 function newElement(myStr) {
   var li = document.createElement("li");
   var s = document.createTextNode(myStr);
@@ -106,7 +105,7 @@ function newElement(myStr) {
   }
 }
 
-//removes a list item from the website blacklist
+// REMOVES A WEBSITE FROM BLACKLIST 
 function removeItem(div) {
   var str = div.innerText.substring(0, div.innerText.length - 1);
   chrome.storage.sync.get({blacklist: []}, function(temp){
@@ -123,7 +122,7 @@ function removeItem(div) {
   div.parentNode.removeChild(div);
 }
 
-// display content onto popup.html
+// DISPLAY CONTENT TO popup.html
 function writeContent(changeLg){
   chrome.storage.sync.get(['userID', 'isPaused', 'blacklist','spanish'], function(temp) {
     isSpanish = temp.spanish;
@@ -165,7 +164,7 @@ function writeContent(changeLg){
   });
 }
 
-// Alarm user how long they have paused the extension
+// ALARM USER ON PAUSING EXTENSION FOR TOO LONG
 // First alarm fires 1hr after the extension is paused, and then fires every other 360 mins
 var alarmOnPause = {
   onHandler : function(e) {
@@ -177,7 +176,7 @@ var alarmOnPause = {
   }
 };
 
-
+// PAUSE THE EXTENSION'S ACTIVITIIES
 function pauseExtension(){
   chrome.storage.sync.get(['isPaused', 'userID','spanish'], function(temp) {
     isSpanish = temp.spanish;
@@ -205,7 +204,8 @@ function pauseExtension(){
     }
   });
 }
-// Get value from chrome.storage using key
+
+// HELPER FUNCTION FOR GETTING PARAMS FROM CHROME SYNC STORAGE
 // Asynchronous. Used in async functions and with 'await' keyword
 async function getSyncStorageValue(key) {
   return new Promise((resolve, reject) => {
@@ -220,44 +220,7 @@ async function getSyncStorageValue(key) {
   });
 }
 
-// function showSpanish(isPaused){
-//   // labels 
-//   document.getElementById('userIDlb').innerHTML = 'User ID (S)';
-//   document.getElementById('lbPause').innerHTML = isPaused ? 'Paused (S)' : 'Active (S)';
-//   document.getElementById('deleteHistorylb').innerHTML = 'Delete browse history (S)'
-//   document.getElementById('blacklistlb').innerHTML = 'Blacklist a website (S)'
-//   document.getElementById('cbllb').innerHTML = 'Current Blacklisted Websites (S)'
-//   document.getElementById('titlelb').innerHTML = 'URL Historian (S)'
-//   // buttons
-//   document.getElementById('btLg').innerHTML = 'English<span class="ui-icon ui-icon-transferthick-e-w">';
-//   document.getElementById('btHelp').innerHTML = 'Help (S)<span class="ui-icon ui-icon-help"></span>';
-//   document.getElementById('btSubmit').innerHTML = 'Submit (S)'
-//   document.getElementById('btDeleteDate').innerHTML = 'by Date (S)'
-//   document.getElementById('btDeleteTime').innerHTML = 'by Time (S)'
-//   document.getElementById('btAdd').innerHTML = 'Add (S)'
-//   //dialog 
-
-
-// }
-
-// function showEnglish(isPaused){
-//   // labels 
-//   document.getElementById('userIDlb').innerHTML = 'User ID'
-//   document.getElementById('lbPause').innerHTML = isPaused ? 'Paused' : 'Active';
-//   document.getElementById('deleteHistorylb').innerHTML = 'Delete browse history'
-//   document.getElementById('blacklistlb').innerHTML = 'Blacklist a website'
-//   document.getElementById('cbllb').innerHTML = 'Current Blacklisted Websites'
-//   document.getElementById('titlelb').innerHTML = 'URL Historian'
-//   // buttons 
-//   document.getElementById('btLg').innerHTML = 'Español<span class="ui-icon ui-icon-transferthick-e-w">';
-//   document.getElementById('btHelp').innerHTML = 'Help<span class="ui-icon ui-icon-help"></span>';
-//   document.getElementById('btSubmit').innerHTML = 'Submit'
-//   document.getElementById('btDeleteDate').innerHTML = 'by Date'
-//   document.getElementById('btDeleteTime').innerHTML = 'by Time'
-//   document.getElementById('btAdd').innerHTML = 'Add'
-// }
-
-// Switch between Spanish and English
+// SWITCH BETWEEN ENGLISH AND SPANISH VERSION
 function changeLanguage(){
   chrome.storage.sync.get('spanish',function(temp){
     if (temp.spanish) { // change to english
@@ -278,9 +241,9 @@ function changeLanguage(){
   });
 }
 
-// Request Data Deletion
+// JQUERY SECTION
 $( function() {
-  // Get global variables from storage
+  // GET PARAMS FROM STORAGE FOR LATER USE
   getSyncStorageValue(['spanish','isDeactivated']).then(function(temp){
     spanish = temp.spanish;
     isDeactivated = temp.isDeactivated;
@@ -801,8 +764,7 @@ $( function() {
   });
 });
 
-
-//link buttons to appropriate functions once website is loaded
+// LINK BUTTONS TO APPROPRIATE FUNCTIONS ONCE POPUP IS LOADED
 document.addEventListener('DOMContentLoaded', (event) => {
   chrome.runtime.getBackgroundPage(function(backgroundPage) {
     document.querySelector('#btSubmit').addEventListener('click', setUserID);
