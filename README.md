@@ -45,6 +45,8 @@ A Chrome extension that enables the collection of web browsing activities in rea
    - You can reset all fields using the **Reset** button.
    - Click on **Delete**. All your data collected within the specified time frame will be permanently deleted from our storage. 
 
+### Spanish localization
+The extension supports Spanish localization. While in the English version (default), click on **Español** to use the Spanish verion. Click on **English** to switch back to the English version.
 
 
 # CREDITS
