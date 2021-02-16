@@ -4,7 +4,7 @@ var resource; //temp
 var pause; //temp
 var date; //local
 var landingPage = "https://csmapnyu.org/2020/08/25/csmap-independent-panel-thank-you/";
-var landingPageSpanish = "https://csmapnyu.org/2020/08/25/csmap-independent-panel-thank-you/";
+var landingPageSpanish = "https://csmapnyu.org/2021/02/12/csmap-independent-panel-thank-you-spanish/";
 
 // MESSAGES 
 valid_msg = "Thank you for contributing to our research!\n\nURL Historian is now active on your browser. You can always click \"Help\" for instructions on how to use our extension. \n\nIf you have any further questions: \nFor technical inquiries regarding the extension, please contact nyu-smapp-engineers@nyu.edu \nFor questions about the data we collect and how your data is used in research projects, please contact csmap-surveys@nyu.edu"
