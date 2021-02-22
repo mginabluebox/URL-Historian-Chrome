@@ -43,7 +43,7 @@ function containsObjectNew(obj, list) {
     if (***REMOVED***) {
       // console.log("Verified User ID:", obj);
       chrome.storage.sync.set({userID: obj, isPaused: false});
-      chrome.browserAction.setIcon({path: "icon128.png"});
+      chrome.browserAction.setIcon({path: "images/icon128.png"});
       chrome.storage.sync.get('spanish',function(temp){
         spanish = temp.spanish;
         if (spanish) alert(valid_msg_spanish);
@@ -237,7 +237,7 @@ chrome.runtime.onStartup.addListener(function () {
   // loadConfigFIRST();
   chrome.storage.sync.get(['isPaused'], function(temp) {
     if(temp.isPaused) {
-      chrome.browserAction.setIcon({path: "icon_disabled.png"});
+      chrome.browserAction.setIcon({path: "images/icon_disabled.png"});
       chrome.storage.sync.set({pausedMins:60, attempt:10});
     } 
   });
@@ -248,7 +248,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
   var reason = details.reason;
   if (reason === "install") {
     chrome.storage.sync.set({isPaused: true, pausedMins: 60, attempt: 10, spanish:false, isDeactivated:false});
-    chrome.browserAction.setIcon({path: "icon_disabled.png"}); 
+    chrome.browserAction.setIcon({path: "images/icon_disabled.png"}); 
   } 
   else if (reason === 'update') {
     // alert('updated')
@@ -256,7 +256,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
       if(temp.spanish) chrome.browserAction.setPopup({popup:"popup_spanish.html"});
       else chrome.browserAction.setPopup({popup:"popup.html"});
       if(temp.isPaused) {
-        chrome.browserAction.setIcon({path: "icon_disabled.png"});
+        chrome.browserAction.setIcon({path: "images/icon_disabled.png"});
         chrome.storage.sync.set({pausedMins:60, attempt:10});
       } 
     });

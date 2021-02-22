@@ -190,12 +190,12 @@ function pauseExtension(){
       chrome.storage.sync.set({isPaused: paused});
       var pauseLabel = document.getElementById("lbPause");
       if(paused){
-        chrome.browserAction.setIcon({path: "icon_disabled.png"});
+        chrome.browserAction.setIcon({path: "images/icon_disabled.png"});
         pauseLabel.innerHTML = isSpanish ? "Pausado" : "Paused";
         // CREATE ALARM
         alarmOnPause.onHandler();
       } else {
-        chrome.browserAction.setIcon({path: "icon128.png"});
+        chrome.browserAction.setIcon({path: "images/icon128.png"});
         pauseLabel.innerHTML = isSpanish ? "Activado":"Active";
         // CLEAR ALARM
         alarmOnPause.offHandler();

@@ -1,23 +1,23 @@
-# Url Historian
+# URL Historian
 
 A Chrome extension that enables the collection of web browsing activities in real-time. It collects data from research participants who opt in to share their browsing history for research purposes. Collected data is securely stored and only accessible to the [CSMaP](https://csmapnyu.org/) research team. The extension is available in [chrome web store](https://support.google.com/chrome_webstore/answer/2664769?hl=en) and accessible via invitation only.
 
 # Installation
 1. Install extension from [chrome web store](https://support.google.com/chrome_webstore/answer/2664769?hl=en).
-2. Once the extension is installed, an icon ![icon](icon16.png) will appear in your browser's toolbar.
+2. Once the extension is installed, an icon ![icon](images/icon16.png) will appear in your browser's toolbar.
 
 # Notification
-* When the icon appears grey ![icon](icon_disabled_16.png), all activities in the extension are paused. After the extension is activated, the icon will appear in color ![icon](icon16.png). 
+* When the icon appears grey ![icon](images/icon_disabled_16.png), all activities in the extension are paused. After the extension is activated, the icon will appear in color ![icon](images/icon16.png). 
 * The extension will send reminders after you pause the extension for 60 minutes. After the first reminder, it will send follow-ups in 6-hour intervals until reactivation. 
 
 # Usage
 ### Login 
 1. Enter your user ID in *User ID*.
-2. Click on **Submit**. The extension will become active ![icon](icon16.png).
+2. Click on **Submit**. The extension will become active ![icon](images/icon16.png).
 3. After 10 failed login attempts, you will be denied access to the extension's functionalities. You can contact our research team to recover your ID and regain access to the extension. 
 
 ### Pause/Activate the extension 
-* Slide the toggle button to the left to pause ![icon](icon_disabled_16.png), or right to reactivate the extension ![icon](icon16.png).
+* Slide the toggle button to the left to pause ![icon](images/icon_disabled_16.png), or right to reactivate the extension ![icon](images/icon16.png).
 
 ### Blacklist websites
 * Set up a list of domains that you prefer to keep private.
