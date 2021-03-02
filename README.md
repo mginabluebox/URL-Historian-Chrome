@@ -8,6 +8,8 @@ A Chrome extension that enables the collection of web browsing activities in rea
   <i>Active/Pause modes</i>
 </p>
 
+This web plug in is for research purposes by CSMaP. The package may not be maintained by the CSMaP team beyond the duration of the project. Additional support for use of this plug in may not be provided. 
+
 # Installation
 1. Install extension from chrome web store.
 2. Once the extension is installed, a CSMaP icon ![icon](images/icon16.png) will appear in your browser's toolbar.
